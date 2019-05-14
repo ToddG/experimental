@@ -1,86 +1,46 @@
-# Tutorial
+# K8s Tut 01
 
-### Link: https://auth0.com/blog/kubernetes-tutorial-step-by-step-introduction-to-basic-concepts/
+## Source
 
-## Create
+https://auth0.com/blog/kubernetes-tutorial-step-by-step-introduction-to-basic-concepts/
 
-### Create dir
+## Commands
 
-    $ mkdir k8s-tutorial
-    $ cd k8s-tutorial/
+### Run Tutorial
 
-    $ kubectl get nodes
-    $ kubectl get pods
-    $ kubectl get namespaces
-    $ kubectl get services
+    $ ./create.sh
 
-### Create deployment
+## Play around wih the tutorial
 
-A deployment.yaml specifies the containers : [{name,image,port}]. After running we should see pods (containers) created.
+    $ kubectl get svc \
+    -n ingress-nginx ingress-nginx \
+    -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
 
-    $ kubectl apply -f deployment.yaml
-
-    $ kubectl get nodes
-    $ kubectl get pods
-    $ kubectl get namespaces
-    $ kubectl get services
-
-### Download and apply ingress controller 1/2
-
-Metric-ton of configuration for Nginx...
-
-Note, I already did this and added to this repo.
-
-    curl https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml -o mandatory.yaml
-
-On with the show...
-
-    $ kubectl apply -f mandatory.yaml
-
-    $ kubectl get nodes
-    $ kubectl get pods
-    $ kubectl get namespaces
-    $ kubectl get services
-    $ kubectl get nodes -n ingress-nginx
+Point browser at the IP address returned...
 
 
-### Download and apply ingress controller 2/2
+## Cleanup Tutorial
 
-Specifies a service? : [port,port,...]
+    $ ./teardown.sh
 
-Note, I already did this and added to this repo.
+## Files
 
-    curl https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/provider/cloud-generic.yaml -o cloud-generic.yaml
+* cloud-generic.yaml
+* create.md
+* deployment.yaml
+* ingress.yaml
+* mandatory.yaml
+* service.yaml
 
-On with the show...
-
-    $ kubectl apply -f cloud-generic.yaml
-
-    $ kubectl get nodes
-    $ kubectl get pods
-    $ kubectl get namespaces
-    $ kubectl get services
-    $ kubectl get nodes -n ingress-nginx
-
-### Expose deployment port via ClusterIP service
-
-Specifies a port redirect from 80 to 3000 for selector -> '...-deployment'
-
-    $ kubectl apply -f service.yaml
-
-    $ kubectl get nodes
-    $ kubectl get pods
-    $ kubectl get namespaces
-    $ kubectl get services
-    $ kubectl get nodes -n ingress-nginx
-
-### Define service ingress
-
-    $ kubectl apply -f ingress.yaml
-    $ kubectl get svc -n ingress-nginx ingress-nginx -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
-    $ curl (kubectl get svc -n ingress-nginx ingress-nginx -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+## Relationships
 
 
-## Destroy
+cloud-generic.yaml
+deployment.yaml
+ingress.yaml
+mandatory.yaml
+service.yaml
 
-    _DESTROY_ ...
+
+
+
