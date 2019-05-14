@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cat tutorial.md  | grep '\$' | sed 's@\$@@g' | sh
+cat tutorial.md  | grep '\$' | sed 's@    \$@@g' | /bin/bash
