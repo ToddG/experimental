@@ -3,13 +3,20 @@ from enum import Enum
 from operator import itemgetter
 import pdb
 import sys
+import logging
+
+logger = logging.getLogger('solution')
 
 class Node:
     """
     Reference parents and children by name.
 
-    >>> Node('foo')
-    [name: foo, children: set()]
+    >>> n = Node("foo")
+    >>> n
+    foo
+    >>> n.is_system = True
+    >>> n
+    [*]foo
     """
     def __init__(self, name: str):
         self._name = name
@@ -42,7 +49,11 @@ class Node:
         self._children.remove(child)
 
     def __repr__(self):
-        return "[name: %s, children: %s]" % (self.name, self.children)
+        if self.is_system:
+            return "[*]%s" % self.name
+        else:
+            return self.name
+
 
 class Graph:
     """
@@ -56,16 +67,19 @@ class Graph:
 
     def add_node(self, node:Node):
         if node.name in self._nodes.keys() or node.name in self._roots:
-            raise Exception("Cannot add node. Node already exists: %s" % node)
+            logger.warning("Cannot add node. Node already exists: %s" % node)
+            return
         self._nodes[node.name] = node
         self._roots.add(node.name)
 
     def make_dep(self, parentkey:str, childkey:str):
         if parentkey not in self._nodes.keys():
-            raise Exception("Error: cannot add node dependency. Parent node key ['%s'] not found in graph." % parentkey)
-        parentnode = self._nodes[parentkey]
+            logger.warning("Error: cannot add node dependency. Parent node key ['%s'] not found in graph." % parentkey)
+            return
         if childkey not in self._nodes.keys():
-            raise Exception("Error: cannot add node dependency. Child node key ['%s'] not found in graph." % childkey)
+            logger.warning("Error: cannot add node dependency. Child node key ['%s'] not found in graph." % childkey)
+            return
+        parentnode = self._nodes[parentkey]
         if childkey in self._roots:
             self._roots.remove(childkey)
         childnode = self._nodes[childkey]
@@ -74,12 +88,15 @@ class Graph:
 
     def remove(self, nodekey:str):
         if nodekey not in self._nodes.keys():
-            raise Exception("Error: cannot remove node. Node key ['%s'] not found in graph." % nodekey)
+            logger.warning("Error: cannot remove node. Node key ['%s'] not found in graph." % nodekey)
+            return
         node = self._nodes[nodekey]
-        if node.is_system == True:
-            raise Exception("Error: cannot remove node. Node ['%s'] is a system node, these are not removable." % nodekey)
+        if node.is_system:
+            logger.warning("Error: cannot remove node. Node ['%s'] is a system node, these are not removable." % nodekey)
+            return
         if len(node.parents) != 0:
-            raise Exception("Error: cannot remove node. Node ['%s'] is dependend on by : %s." % (nodekey, node.parents))
+            logger.warning("Error: cannot remove node. Node ['%s'] is dependent on by : %s." % (nodekey, node.parents))
+            return
         # remove this node and remove it from the parents of child nodes, transitively removing them if they have no other parents
         for childkey in node.children:
             self.unparent(nodekey, childkey)
@@ -90,17 +107,20 @@ class Graph:
     def unparent(self, parentkey: str, nodekey:str):
         node = self._nodes[nodekey]
         node.remove_parent(parentkey)
-        if len(node.parents) == 0 and not node.is_system:
-            self.remove(nodekey)
+        if len(node.parents) == 0:
+            self._roots.add(nodekey)
+            if not node.is_system:
+                self.remove(nodekey)
        
     def make_system(self, nodekey:str):
         if nodekey not in self._nodes.keys():
-            raise Exception("Error: cannot remove node. Node key ['%s'] not found in graph." % nodekey)
+            logger.warning("Error: cannot remove node. Node key ['%s'] not found in graph." % nodekey)
+            return
         self._nodes[nodekey].is_system = True
 
     def reify(self, key: str):
         n = self._nodes[key]
-        m = {'name':key, 'children':sorted([self.reify(c) for c in n.children], key=itemgetter('name'))}
+        m = {'name':str(n), 'children':sorted([self.reify(c) for c in n.children], key=itemgetter('name'))}
         return m
 
     def __repr__(self):
@@ -125,20 +145,14 @@ class FileReader:
     
     def __init__(self, args):
         self._file = args.file
-        self._debug = args.debug
-
-    @property
-    def debug(self):
-        return self._debug
 
     def lines(self):
         with open(self._file, 'r') as f:
             return f.readlines()
 
 class FakeReader(FileReader):
-    def __init__(self, lines, debug=False):
+    def __init__(self, lines):
         self._lines = lines
-        self._debug = debug
 
     def lines(self):
         return self._lines
@@ -152,10 +166,8 @@ class CommandParser:
     ## Test 01
     ADD a b c
 
-    >>> fake_reader = FakeReader(["ADD a b c", "PRINT"], True)
+    >>> fake_reader = FakeReader(["ADD a b c", "PRINT"])
     >>> CommandParser(fake_reader).parse()
-    [debug] ADD a b c
-    [debug] PRINT
     [{'name': 'a', 'children': []}, {'name': 'b', 'children': []}, {'name': 'c', 'children': []}]
 
     ## Test 02
@@ -169,12 +181,10 @@ class CommandParser:
     def __init__(self, reader: FileReader):
         self._reader = reader
         self._graph = Graph()
-        self._debug = reader.debug
 
     def parse(self):
         for line in self._reader.lines():
-            if self._debug:
-                print("[debug] %s" % line)
+            logger.debug(line)
             parts = line.split(" ")
             command = parts[0]
             args = parts[1:]
@@ -261,15 +271,31 @@ class CommandParser:
         REMOVE c
 
         >>> CommandParser(FakeReader(["ADD a b c", "DEP a b", "DEP b c", "REMOVE c", "PRINT"])).parse()
-        Traceback (most recent call last):
-            ...
-        Exception: Error: cannot remove node. Node ['c'] is dependend on by : {'b'}.
+        [{'name': 'a', 'children': [{'name': 'b', 'children': [{'name': 'c', 'children': []}]}]}]
         """
         depkeys = args[:]
         for depkey in depkeys:
             self._graph.remove(depkey)
 
     def do_system(self, args):
+        """
+        ADD a
+        SYSTEM a
+        REMOVE a
+        PRINT
+
+        >>> CommandParser(FakeReader(["ADD a", "SYSTEM a", "REMOVE a", "PRINT"])).parse()
+        [{'name': '[*]a', 'children': []}]
+
+        ADD a b c
+        DEP a b 
+        DEP b c
+        SYSTEM b
+        REMOVE a
+
+        >>> CommandParser(FakeReader(["ADD a b c", "DEP a b", "DEP b c", "SYSTEM b", "REMOVE a", "PRINT"])).parse()
+        [{'name': '[*]b', 'children': [{'name': 'c', 'children': []}]}]
+       """
         depkeys = args[:]
         for depkey in depkeys:
             self._graph.make_system(depkey)
@@ -286,6 +312,11 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", help="increase output verbosity", action="store_true")
     parser.add_argument("-s", "--skiptests", help="skip internal doctests", action="store_true")
     args = parser.parse_args()
+
+    if args.debug == True:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.ERROR)
 
     if args.skiptests == True:
         print("skipping doc tests...")
