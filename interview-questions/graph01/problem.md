@@ -56,7 +56,7 @@ PRINT
 
 * Items can belong to multiple parents
 
-"""
+```bash
 ADD a b c z
 DEP a b c
 DEP z b c
@@ -65,7 +65,7 @@ DEP z b c
         [a] -> [[b], [c]], 
         [z] -> [[b], [c]],
     ]
-"""
+```
 
 Q: Can you remove 'c'? No.
 Q: Can you remove 'b'? No.
@@ -77,7 +77,7 @@ It seems to me, that the root level items are the only items without dependenden
 
 * Updating a node's dependencies updates for all instances or placements of that node
 
-"""
+```bash
 ADD a b c z q
 DEP a b c
 DEP z b c
@@ -87,7 +87,7 @@ DEP c q
         [a] -> [[b], [c] -> [q]], 
         [z] -> [[b], [c] -> [q]],
     ]
-"""
+```
 
 This implies that there is only one instance of a given node to be updated. The easy way to accomplish this would be with a map. Below I'll parse the input from the lines above...
 
