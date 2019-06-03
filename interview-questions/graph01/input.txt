@@ -1,0 +1,9 @@
+ADD a b c
+ADD d e
+DEP a b c d
+DEP b c d
+REMOVE d
+REMOVE a
+ADD z
+DEP c e
+PRINT
