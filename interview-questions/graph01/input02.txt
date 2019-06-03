@@ -1,0 +1,7 @@
+# add something
+ADD a
+# now print something
+PRINT
+
+
+# done

@@ -168,14 +168,14 @@ class CommandParser:
 
     >>> fake_reader = FakeReader(["ADD a b c", "PRINT"])
     >>> CommandParser(fake_reader).parse()
-    [{'name': 'a', 'children': []}, {'name': 'b', 'children': []}, {'name': 'c', 'children': []}]
+    "[{'name': 'a', 'children': []}, {'name': 'b', 'children': []}, {'name': 'c', 'children': []}]"
 
     ## Test 02
     ADD a b c
 
     >>> fake_reader = FakeReader(["ADD a b c", "PRINT"])
     >>> CommandParser(fake_reader).parse()
-    [{'name': 'a', 'children': []}, {'name': 'b', 'children': []}, {'name': 'c', 'children': []}]
+    "[{'name': 'a', 'children': []}, {'name': 'b', 'children': []}, {'name': 'c', 'children': []}]"
 
     """
     def __init__(self, reader: FileReader):
@@ -183,23 +183,31 @@ class CommandParser:
         self._graph = Graph()
 
     def parse(self):
+        output = []
         for line in self._reader.lines():
             logger.debug(line)
-            parts = line.split(" ")
-            command = parts[0]
-            args = parts[1:]
-            if Command.ADD.name == command:
-                self.do_add(args)
-            elif Command.DEP.name == command:
-                self.do_dep(args)
-            elif Command.REMOVE.name == command:
-                self.do_remove(args)
-            elif Command.SYSTEM.name == command:
-                self.do_system(args)
-            elif Command.PRINT.name == command:
-                self.do_print(args)
+            if line == "" or line == "\n" or line.startswith("#"):
+                continue
+            parts = line.split()
+            if len(parts) > 1:
+                command = parts[0]
+                args = parts[1:]
             else:
-                raise Exception("Unknown command: %s" % command)
+                command = line.rstrip().lstrip()
+                args = []
+            if Command.ADD.name.lower() == command.lower():
+                self.do_add(args)
+            elif Command.DEP.name.lower() == command.lower():
+                self.do_dep(args)
+            elif Command.REMOVE.name.lower() == command.lower():
+                self.do_remove(args)
+            elif Command.SYSTEM.name.lower() == command.lower():
+                self.do_system(args)
+            elif Command.PRINT.name.lower() == command.lower():
+                output.append(self.do_print(args))
+            else:
+                raise Exception("Unknown command: '%s'" % command)
+        return "\n".join(output)
 
 
     def do_add(self, args):
@@ -214,11 +222,11 @@ class CommandParser:
 
         >>> fake_reader = FakeReader(["ADD a b c"])
         >>> CommandParser(fake_reader).parse()
-
+        ''
 
         >>> fake_reader = FakeReader(["ADD a b c", "PRINT"])
         >>> CommandParser(fake_reader).parse()
-        [{'name': 'a', 'children': []}, {'name': 'b', 'children': []}, {'name': 'c', 'children': []}]
+        "[{'name': 'a', 'children': []}, {'name': 'b', 'children': []}, {'name': 'c', 'children': []}]"
         """
         nodes = [Node(x) for x in args]
         for node in nodes:
@@ -240,7 +248,7 @@ class CommandParser:
 
         >>> fake_reader = FakeReader(["ADD a b c", "DEP a b", "DEP b c", "PRINT"])
         >>> CommandParser(fake_reader).parse()
-        [{'name': 'a', 'children': [{'name': 'b', 'children': [{'name': 'c', 'children': []}]}]}]
+        "[{'name': 'a', 'children': [{'name': 'b', 'children': [{'name': 'c', 'children': []}]}]}]"
         """
         parentkey = args[0]
         depkeys = args[1:]
@@ -263,7 +271,7 @@ class CommandParser:
         []
 
         >>> CommandParser(FakeReader(["ADD a b c", "DEP a b", "DEP b c", "REMOVE a", "PRINT"])).parse()
-        []
+        '[]'
 
         ADD a b c
         DEP a b 
@@ -271,7 +279,7 @@ class CommandParser:
         REMOVE c
 
         >>> CommandParser(FakeReader(["ADD a b c", "DEP a b", "DEP b c", "REMOVE c", "PRINT"])).parse()
-        [{'name': 'a', 'children': [{'name': 'b', 'children': [{'name': 'c', 'children': []}]}]}]
+        "[{'name': 'a', 'children': [{'name': 'b', 'children': [{'name': 'c', 'children': []}]}]}]"
         """
         depkeys = args[:]
         for depkey in depkeys:
@@ -285,7 +293,7 @@ class CommandParser:
         PRINT
 
         >>> CommandParser(FakeReader(["ADD a", "SYSTEM a", "REMOVE a", "PRINT"])).parse()
-        [{'name': '[*]a', 'children': []}]
+        "[{'name': '[*]a', 'children': []}]"
 
         ADD a b c
         DEP a b 
@@ -294,14 +302,14 @@ class CommandParser:
         REMOVE a
 
         >>> CommandParser(FakeReader(["ADD a b c", "DEP a b", "DEP b c", "SYSTEM b", "REMOVE a", "PRINT"])).parse()
-        [{'name': '[*]b', 'children': [{'name': 'c', 'children': []}]}]
+        "[{'name': '[*]b', 'children': [{'name': 'c', 'children': []}]}]"
        """
         depkeys = args[:]
         for depkey in depkeys:
             self._graph.make_system(depkey)
 
     def do_print(self, args):
-        print(self._graph)
+        return str(self._graph)
 
 
 if __name__ == "__main__":
@@ -325,4 +333,4 @@ if __name__ == "__main__":
         doctest.testmod()
         print ("doc tests complete")
 
-    CommandParser(FileReader(args)).parse()
+    print(CommandParser(FileReader(args)).parse())
