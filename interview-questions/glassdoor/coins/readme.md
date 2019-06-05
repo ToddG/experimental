@@ -23,22 +23,36 @@ mypy coins.py --ignore-missing-imports
 pytest coins.py --hypothesis-show-statistics
 ============================================================================================== test session starts ==============================================================================================
 platform linux -- Python 3.7.3, pytest-4.3.1, py-1.8.0, pluggy-0.9.0
-hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/home/toddg/repos/personal/experimental/interview-questions/glassdoor/.hypothesis/examples')
-rootdir: /home/toddg/repos/personal/experimental/interview-questions/glassdoor, inifile:
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/home/toddg/repos/personal/experimental/interview-questions/glassdoor/coins/.hypothesis/examples')
+rootdir: /home/toddg/repos/personal/experimental/interview-questions/glassdoor/coins, inifile:
 plugins: remotedata-0.3.1, openfiles-0.3.2, doctestplus-0.3.0, arraydiff-0.3, hypothesis-4.23.6
-collected 1 item
+collected 3 items                                                                                                                                                                                               
 
-coins.py .                                                                                                                                                                                                [100%]
+coins.py ...                                                                                                                                                                                              [100%]
 ============================================================================================= Hypothesis Statistics =============================================================================================
 
 coins.py::test_generate_random_table:
 
   - 100 passing examples, 0 failing examples, 0 invalid examples
-  - Typical runtimes: 0-6 ms
-  - Fraction of time spent in data generation: ~ 24%
+  - Typical runtimes: 0-4 ms
+  - Fraction of time spent in data generation: ~ 28%
   - Stopped because settings.max_examples=100
 
-=========================================================================================== 1 passed in 0.28 seconds ============================================================================================
+coins.py::test_generate_divisible_table:
+
+  - 100 passing examples, 0 failing examples, 0 invalid examples
+  - Typical runtimes: 0-3 ms
+  - Fraction of time spent in data generation: ~ 19%
+  - Stopped because settings.max_examples=100
+
+coins.py::test_partition_table:
+
+  - 100 passing examples, 0 failing examples, 0 invalid examples
+  - Typical runtimes: 0-5 ms
+  - Fraction of time spent in data generation: ~ 19%
+  - Stopped because settings.max_examples=100
+
+=========================================================================================== 3 passed in 0.56 seconds ============================================================================================
 python3 coins.py
 ```
 
