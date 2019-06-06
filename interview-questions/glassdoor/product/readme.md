@@ -49,10 +49,10 @@ Eshell V10.3.5.1  (abort with ^G)
 
 Ok, easy peasy.
 
-How 'bout in python?
+How about in python?
 
 ```python
-`$ ipython
+$ ipython
 Python 3.7.3 (default, Mar 27 2019, 22:11:17) 
 Type 'copyright', 'credits' or 'license' for more information
 IPython 7.4.0 -- An enhanced Interactive Python. Type '?' for help.
