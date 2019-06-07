@@ -87,6 +87,13 @@ In [6]: import functools
 Out[6]: [24, 12, 8, 6]
 ```
 
+### Implementation
+
+Let's memoize the computations. If these were expensive to calculate, this would outweigh the costs of storing and retrieving them from a cache.
+
+Q: What is the cost of this memoization?
+Q: At what point does it become cost effective to implement?
+
 ## Summary
 
 So basically it's the same approach, only Erlang has a much nicer way to extract an element from the list.
