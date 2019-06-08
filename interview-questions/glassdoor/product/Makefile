@@ -9,5 +9,5 @@ all: erlang
 
 .PHONY: erlang
 erlang:
-	cd erlang/memoize && rebar3 do escriptize, eunit, proper
+	cd erlang/memoize && rebar3 do escriptize, eunit
 	cd erlang/memoize && _build/default/bin/memoize
