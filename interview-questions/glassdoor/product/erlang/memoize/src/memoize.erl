@@ -61,12 +61,9 @@ add_root(N, G) when is_record(N, node) andalso is_record(G, graph) ->
 add_child_by_key(_, nil, G) ->
     G;
 add_child_by_key(K1, K2, G) ->
-    ?debugFmt("K1: ~p, K2: ~p", [K1, K2]),
     dump_graph(G),
     LHS = dict:fetch(K1, G#graph.dict),
-    ?debugFmt("LHS: ~p", [LHS]),
     RHS = dict:fetch(K2, G#graph.dict),
-    ?debugFmt("RHS: ~p", [RHS]),
     add_child(LHS, RHS, G).
 
 add_child(N1, nil, G) when is_record(N1, node) andalso is_record(G, graph) -> G;
@@ -86,7 +83,6 @@ child(N1,N2,G) when is_record(N1, node) andalso
                     is_record(G, graph) ->
     F = G#graph.fx,
     [RootKey|_] = N1#node.key,
-    ?debugFmt("RootKey: ~p", [RootKey]),
     RootNode = dict:fetch([RootKey], G#graph.dict),
     V1 = RootNode#node.value,
     V2 = N2#node.value,
@@ -99,6 +95,7 @@ fetch(K, G) when is_record(G, graph) ->
     N#node.value.
 
 multiply(A,B) when is_number(A) andalso is_number(B) -> 
+    %% TODO: put counters in here for metrics
     ?debugFmt("~nmultiply ~w * ~w ~n", [A, B]),
     A*B.
 
