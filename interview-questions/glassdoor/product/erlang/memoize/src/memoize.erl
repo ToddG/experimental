@@ -4,7 +4,7 @@
 -record(graph,  {root=[nil], fx, dict=dict:new()}).
 
 %% API exports
--export([main/1, mult/1, multm/1]).
+-export([main/1, mult/1, mult/2, multm/1, multm/2, multiply/2, multz/1, multz/2, fetchz/3]).
 
 %%====================================================================
 %% API functions
@@ -27,16 +27,71 @@ mult(L) when is_list(L) ->
     %% it re-calculates the entire graph - 1 elements for each
     %% element in the list.
     %%----------------------------------------------------------
-    [lists:foldl(fun(A,B) -> multiply(A, B) end, 1, Z) || Z <- replacements(L)].
+    mult(L, fun multiply/2).
+
+mult(L, MultFunc) when is_list(L) ->
+    %%----------------------------------------------------------
+    %% mult/2 provides an injection point for the multiply
+    %% function, which may be instrumented for performance 
+    %% analysis.
+    %%----------------------------------------------------------
+    [lists:foldl(MultFunc, 1, Z) || Z <- replacements(L)].
 
 multm([]) ->
     [];
 multm(L) when is_list(L) andalso length(L) > 0->
     %%----------------------------------------------------------
     %% This is a memoized version of mult.
+    %% Prliminary tests indicate it is 100x slower than mult.
     %%----------------------------------------------------------
-    M = memom(L),
+    multm(L, fun multiply/2).
+
+multm(L, MultFunc) when is_list(L) andalso length(L) > 0->
+    %%----------------------------------------------------------
+    %% multm/2 provides an injection point for the multiply
+    %% function, which may be instrumented for performance 
+    %% analysis.
+    %%----------------------------------------------------------
+    M = memom(L, MultFunc),
     [fetch(K, M) || K <- replacements(L)].
+
+
+multz([]) ->
+    [];
+multz(L) when is_list(L) andalso length(L) > 0 ->
+    multz(L, fun multiply/2).
+
+multz(L, MultFunc) ->
+    F = fun(X, D) -> 
+                {_, D1} = fetchz(X, D, MultFunc),
+                D1 end,
+    R = replacements(L),
+    % foldl constructs the graph, including the final answers
+    D1 = lists:foldl(F, dict:new(), R),
+    % query for the final answers
+    [ V || #node{value=V} <- [dict:fetch(K, D1) || K <- replacements(L)]].
+
+
+fetchz([K], D, _) ->
+    N = #node{key=[K], value=K},
+    D1 = dict:store(N#node.key, N, D),
+    {K, D1};
+fetchz(K, D, F) ->
+    case dict:is_key(K,D) of
+        true -> 
+            N = dict:fetch(K, D),
+            {N#node.value, D};
+        false ->
+            L = length(K),
+            HL = L div 2,
+            {K1, K2} = lists:split(HL, K),
+            {V1, D1} = fetchz(K1, D, F),
+            {V2, D2} = fetchz(K2, D1, F),
+            V3 = F(V1, V2),
+            N = #node{key=K1 ++ K2, value=V3},
+            D3 = dict:store(N#node.key, N, D2),
+            {V3, D3}
+    end.
 
 replacements(L) ->
     lists:filter(fun(A) -> length(A) > 0 end, [L -- [X] || X <- L]).
@@ -46,7 +101,10 @@ replacements(L) ->
 %%====================================================================
 
 memom(L) ->
-    memo(lists:reverse(L), #graph{fx=fun(A,B) -> multiply(A,B) end}).
+    %% provided for eunit tests
+    memom(L, fun multiply/2).
+memom(L, MultFunc) ->
+    memo(lists:reverse(L), #graph{fx=MultFunc}).
 
 memo([H|T], G) when is_record(G, graph) andalso is_number(H) ->
     N = #node{key=[H], value=H},
@@ -107,7 +165,6 @@ fetch(K, G) when is_record(G, graph) ->
     end.
 
 multiply(A,B) when is_number(A) andalso is_number(B) -> 
-    %% TODO: put counters in here for metrics
     A*B.
 
 
@@ -144,6 +201,16 @@ multm_1_test_() ->
      ?_assertEqual(multm([1,2,3]), [6,3,2]),
      ?_assertEqual(multm([4,99,20,6]), [99*20*6, 4*20*6, 4*99*6, 4*99*20])
     ].
+
+multz_1_test_() ->
+    [
+     ?_assertEqual(multz([]), []),
+     ?_assertEqual(multz([1]), []),
+     ?_assertEqual(multz([1,2]), [2,1]),
+     ?_assertEqual(multz([1,2,3]), [6,3,2]),
+     ?_assertEqual(multz([4,99,20,6]), [99*20*6, 4*20*6, 4*99*6, 4*99*20])
+    ].
+
 
 memom_1_test_() ->
     [
