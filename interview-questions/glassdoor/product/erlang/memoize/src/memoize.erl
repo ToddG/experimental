@@ -27,16 +27,19 @@ mult(L) when is_list(L) ->
     %% it re-calculates the entire graph - 1 elements for each
     %% element in the list.
     %%----------------------------------------------------------
-    [lists:foldl(fun(A,B) -> A*B end, 1, Z) || Z <- [L --[X] || X <- L]].
+    [lists:foldl(fun(A,B) -> multiply(A, B) end, 1, Z) || Z <- replacements(L)].
 
 multm([]) ->
     [];
-multm(L) when is_list(L) ->
+multm(L) when is_list(L) andalso length(L) > 0->
     %%----------------------------------------------------------
     %% This is a memoized version of mult.
     %%----------------------------------------------------------
     M = memom(L),
-    [fetch(K, M) || K <- [L --[X] || X <- L]].
+    [fetch(K, M) || K <- replacements(L)].
+
+replacements(L) ->
+    lists:filter(fun(A) -> length(A) > 0 end, [L -- [X] || X <- L]).
 
 %%====================================================================
 %% Internal functions
@@ -91,29 +94,56 @@ child(N1,N2,G) when is_record(N1, node) andalso
     #node{key=K, value=R}.
 
 fetch(K, G) when is_record(G, graph) ->
-    N = dict:fetch(K, G#graph.dict),
-    N#node.value.
+    case dict:is_key(K,G#graph.dict) of
+        true -> 
+            N = dict:fetch(K, G#graph.dict),
+            N#node.value;
+        false ->
+            L = length(K),
+            HL = L div 2,
+            {K1, K2} = lists:split(HL, K),
+            F = G#graph.fx,
+            F(fetch(K1, G), fetch(K2, G))
+    end.
 
 multiply(A,B) when is_number(A) andalso is_number(B) -> 
     %% TODO: put counters in here for metrics
-    ?debugFmt("~nmultiply ~w * ~w ~n", [A, B]),
     A*B.
 
 
 dump_graph(G) when is_record(G, graph) ->
-    Start = "~nGraph START--------------------------------~n",
-    Middle = "root: ~w~nfx: ~p~ndict:~n",
-    End = "~nGraph END----------------------------------~n",
-    D = format_dict(G#graph.dict),
-    ?debugFmt(Start ++ Middle ++ D ++ End, [G#graph.root, G#graph.fx ]).
+%    Start = "~nGraph START--------------------------------~n",
+%    Middle = "root: ~w~nfx: ~p~ndict:~n",
+%    End = "~nGraph END----------------------------------~n",
+%    D = format_dict(G#graph.dict),
+%    ?debugFmt(Start ++ Middle ++ D ++ End, [G#graph.root, G#graph.fx ]).
+    ok.
 
-format_dict(D) ->
-    string:join([lists:flatten(io_lib:format("key: ~w, value: ~w", [Key, Value])) || {Key,Value} <- dict:to_list(D)], "\n").
+%format_dict(D) ->
+%    string:join([lists:flatten(io_lib:format("key: ~w, value: ~w", [Key, Value])) || {Key,Value} <- dict:to_list(D)], "\n").
 
 
 %%====================================================================
 %% Eunit tests
 %%====================================================================
+
+mult_1_test_() ->
+    [
+     ?_assertEqual(mult([]), []),
+     ?_assertEqual(mult([1]), []),
+     ?_assertEqual(mult([1,2]), [2,1]),
+     ?_assertEqual(mult([1,2,3]), [6,3,2]),
+     ?_assertEqual(mult([4,99,20,6]), [99*20*6, 4*20*6, 4*99*6, 4*99*20])
+    ].
+
+multm_1_test_() ->
+    [
+     ?_assertEqual(multm([]), []),
+     ?_assertEqual(multm([1]), []),
+     ?_assertEqual(multm([1,2]), [2,1]),
+     ?_assertEqual(multm([1,2,3]), [6,3,2]),
+     ?_assertEqual(multm([4,99,20,6]), [99*20*6, 4*20*6, 4*99*6, 4*99*20])
+    ].
 
 memom_1_test_() ->
     [
