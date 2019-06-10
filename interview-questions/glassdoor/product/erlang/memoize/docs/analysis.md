@@ -50,9 +50,9 @@ How expensive is it?
 K : Cost for multiplication (MultFunc)
 N : Number of elements
 
-(K^(N-1))*N) ~= K^N
+(K*(N-1))*N) ~= KN^2
 ```
-So, expensive. A constant to an exponential.
+So O(N^2).
 
 ### Solution #2 : Pre-calculate
 
@@ -112,6 +112,58 @@ N : Number of elements
 CS : Cost to store in cache
 CR : Cost to retrieve from cache
 
-Nlog(N)(K + CS + CR)
+Nlog[base2](N)(K + CS + CR)
 ```
+
+## Profiling with `cprof`
+
+Let's see if the profiled outputs match up to what we'd expect, for runs where N=100.
+
+### Solution #1 `mult`
+
+```erlang
+time=: 0.008 s
+cprof mult
+{memoize,20106,
+         [{{memoize,multiply,2},9900},
+```
+Here we can see that the `multiply` function was called 9900 times, which is 99 * 100.
+
+```text
+(K*(N-1))*N) ~= KN^2
+K(99)(100) == 9900 times
+```
+
+### Solution #2 `multm`
+
+```erlang
+time=: 0.085 s
+cprof multm
+{memoize,42672,
+         [{{memoize,multiply,2},5516},
+```
+Something is clearly amiss here, as we called multiply only ~5K times, but the runtime of this algorithm is 10x longer than `mult`.
+
+### Solution #3 `multz`
+
+```erlang
+time=: 0.010 s
+cprof multz
+{memoize,3857,
+         [{{memoize,fetchz,3},1624},
+          {{memoize,multiply,2},762},
+```
+
+Here we invoked multiply less than 1K times.
+
+```text
+So to build the cache:
+	Nlog[base2](N) = 100*6.64=664
+Then to assemble the final results
+	664 + 100 = 764 ~= 762
+```
+
+So this checks out. To understand what is going on in more detail, we'll have to look at the fprof stats.
+
+## Profiling with `fprof`
 
