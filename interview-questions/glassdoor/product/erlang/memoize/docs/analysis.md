@@ -50,9 +50,8 @@ How expensive is it?
 K : Cost for multiplication (MultFunc)
 N : Number of elements
 
-(K*(N-1))*N) ~= KN^2
+(K*(N-1))*N) ~= K*(N^2) ~= O(N^2)
 ```
-So O(N^2).
 
 ### Solution #2 : Pre-calculate
 
@@ -78,16 +77,17 @@ multm(L, MultFunc) ->
     [fetch(K, M) || K <- replacements(L)].
 ```
 
-How expensive is this? Well, we have to build the cache and then iterate one last time over the list, so that should be:
+How expensive is this? Well, we have to build the cache and then iterate one last time over the list, so that should be based off of pythoragas triangle...
+
+https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
+
 
 ```text
 K : Cost for multiplication (MultFunc)
 N : Number of elements
 
-SUM[1->N]{N^N}
+N(N+1)/2 ~= O(N^2)
 ```
-
-So, very expensive. N is exponential.
 
 ### Solution #3 : Binary Search and Cache
 
@@ -127,12 +127,13 @@ cprof mult
 {memoize,20106,
          [{{memoize,multiply,2},9900},
 ```
-Here we can see that the `multiply` function was called 9900 times, which is 99 * 100.
+Here we can see that the `multiply` function was called 9900 times, which is 99 * 100. Comparing that with the expected algorithm performance shows:
 
 ```text
-(K*(N-1))*N) ~= KN^2
-K(99)(100) == 9900 times
+(K*(N-1))*N) => K(99)(100) == 9900 times
 ```
+
+Multiply was called the exact expected number of times.
 
 ### Solution #2 `multm`
 
@@ -142,7 +143,12 @@ cprof multm
 {memoize,42672,
          [{{memoize,multiply,2},5516},
 ```
-Something is clearly amiss here, as we called multiply only ~5K times, but the runtime of this algorithm is 10x longer than `mult`.
+
+```text
+N(N+1)/2 => 100(100+1)/2 = (10000 + 100)/2 = 5050 ~= 5516
+```
+
+Multiply was called very close to the expected number of times. However, the run time is 10x slower than than `mult` so we'll have to examine this implmentation further to understand what factors are driving this.
 
 ### Solution #3 `multz`
 
@@ -150,20 +156,20 @@ Something is clearly amiss here, as we called multiply only ~5K times, but the r
 time=: 0.010 s
 cprof multz
 {memoize,3857,
-         [{{memoize,fetchz,3},1624},
           {{memoize,multiply,2},762},
 ```
 
 Here we invoked multiply less than 1K times.
 
 ```text
-So to build the cache:
-	Nlog[base2](N) = 100*6.64=664
-Then to assemble the final results
-	664 + 100 = 764 ~= 762
+Nlog[base2](N) => 100*6.64=664 
 ```
 
-So this checks out. To understand what is going on in more detail, we'll have to look at the fprof stats.
+This is close. Multiply was called 762 times and the model predicted 664 times. Not sure what is causing the discrepancy. However, the real question is what is causing this implementation to be slower than `mult`?
+
 
 ## Profiling with `fprof`
+
+To understand what is going on in more detail, we'll have to look at the fprof stats.
+
 
