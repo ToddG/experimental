@@ -1,0 +1,500 @@
+events: Time
+summary: 229492
+fl=fprof
+fn={fprof,just_call,2}
+1 42
+cfl=memoize
+cfn={memoize,multz,1}
+calls=1 1
+1 229419
+cfl=erlang
+cfn={erlang,demonitor,1}
+calls=1 1
+1 10
+cfl=erlang
+cfn={erlang,monitor,2}
+calls=1 1
+1 4
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 0
+fl=prof_memo
+fn={prof_memo,fprofile,3}
+1 3
+cfl=fprof
+cfn={fprof,just_call,2}
+calls=0 1
+1 229426
+cfl=fprof
+cfn={fprof,trace,1}
+calls=1 1
+1 32
+fl=memoize
+fn={memoize,multz,1}
+1 10
+cfl=memoize
+cfn={memoize,multz,2}
+calls=1 1
+1 229409
+fl=memoize
+fn={memoize,multz,2}
+1 27
+cfl=lists
+cfn={lists,foldl,3}
+calls=1 1
+1 220677
+cfl=memoize
+cfn={memoize,'-multz/2-lc$^1/1-1-',2}
+calls=1 1
+1 4208
+cfl=memoize
+cfn={memoize,replacements,1}
+calls=2 1
+1 4038
+cfl=memoize
+cfn={memoize,'-multz/2-lc$^2/1-0-',1}
+calls=1 1
+1 445
+cfl=dict
+cfn={dict,new,0}
+calls=1 1
+1 13
+fl=lists
+fn={lists,foldl,3}
+1 600
+cfl=memoize
+cfn={memoize,'-multz/2-fun-0-',3}
+calls=100 1
+1 220077
+cfl=lists
+cfn={lists,foldl,3}
+calls=100 1
+1 0
+fl=memoize
+fn={memoize,'-multz/2-fun-0-',3}
+1 490
+cfl=memoize
+cfn={memoize,fetchz,3}
+calls=100 1
+1 219562
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 25
+fl=memoize
+fn={memoize,fetchz,3}
+1 21149
+cfl=dict
+cfn={dict,store,3}
+calls=1088 1
+1 92174
+cfl=dict
+cfn={dict,is_key,2}
+calls=1298 1
+1 45656
+cfl=lists
+cfn={lists,split,2}
+calls=762 1
+1 37168
+cfl=dict
+cfn={dict,fetch,2}
+calls=536 1
+1 17489
+cfl=memoize
+cfn={memoize,'-multz/1-fun-0-',2}
+calls=762 1
+1 4204
+cfl=erlang
+cfn={erlang,'++',2}
+calls=762 1
+1 1705
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 17
+cfl=memoize
+cfn={memoize,fetchz,3}
+calls=1524 1
+1 0
+fl=dict
+fn={dict,store,3}
+1 9022
+cfl=dict
+cfn={dict,on_bucket,3}
+calls=1088 1
+1 47213
+cfl=dict
+cfn={dict,maybe_expand,2}
+calls=1088 1
+1 27889
+cfl=dict
+cfn={dict,get_slot,2}
+calls=1088 1
+1 8016
+cfl=pseudo
+cfn=suspend
+calls=2 1
+1 33
+fl=dict
+fn={dict,on_bucket,3}
+1 13847
+cfl=dict
+cfn={dict,'-store/3-fun-0-',3}
+calls=1088 1
+1 25760
+cfl=erlang
+cfn={erlang,setelement,3}
+calls=3264 1
+1 7160
+cfl=pseudo
+cfn=garbage_collect
+calls=4 1
+1 287
+cfl=pseudo
+cfn=suspend
+calls=4 1
+1 159
+fl=dict
+fn={dict,is_key,2}
+1 10534
+cfl=dict
+cfn={dict,find_key,2}
+calls=1298 1
+1 18476
+cfl=dict
+cfn={dict,get_slot,2}
+calls=1298 1
+1 9842
+cfl=dict
+cfn={dict,get_bucket,2}
+calls=1298 1
+1 6787
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 17
+fl=lists
+fn={lists,split,2}
+1 3599
+cfl=lists
+cfn={lists,split,3}
+calls=762 1
+1 33569
+fl=lists
+fn={lists,split,3}
+1 31583
+cfl=lists
+cfn={lists,reverse,2}
+calls=762 1
+1 1684
+cfl=pseudo
+cfn=garbage_collect
+calls=4 1
+1 232
+cfl=pseudo
+cfn=suspend
+calls=4 1
+1 70
+cfl=lists
+cfn={lists,split,3}
+calls=9849 1
+1 0
+fl=dict
+fn={dict,maybe_expand,2}
+1 3229
+cfl=dict
+cfn={dict,maybe_expand_aux,2}
+calls=1088 1
+1 24660
+fl=dict
+fn={dict,'-store/3-fun-0-',3}
+1 3326
+cfl=dict
+cfn={dict,store_bkt_val,3}
+calls=1088 1
+1 22422
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 12
+fl=dict
+fn={dict,maybe_expand_aux,2}
+1 6887
+cfl=dict
+cfn={dict,rehash,4}
+calls=157 1
+1 11268
+cfl=dict
+cfn={dict,put_bucket_s,3}
+calls=314 1
+1 3745
+cfl=erlang
+cfn={erlang,setelement,3}
+calls=931 1
+1 2049
+cfl=dict
+cfn={dict,maybe_expand_segs,1}
+calls=157 1
+1 376
+cfl=dict
+cfn={dict,get_bucket_s,2}
+calls=157 1
+1 335
+fl=dict
+fn={dict,get_slot,2}
+1 14425
+cfl=erlang
+cfn={erlang,phash,2}
+calls=3022 1
+1 7769
+cfl=pseudo
+cfn=garbage_collect
+calls=3 1
+1 216
+cfl=pseudo
+cfn=suspend
+calls=2 1
+1 37
+fl=dict
+fn={dict,store_bkt_val,3}
+1 22392
+cfl=pseudo
+cfn=suspend
+calls=2 1
+1 30
+cfl=dict
+cfn={dict,store_bkt_val,3}
+calls=4335 1
+1 0
+fl=dict
+fn={dict,fetch,2}
+1 6053
+cfl=dict
+cfn={dict,fetch_val,2}
+calls=636 1
+1 6967
+cfl=dict
+cfn={dict,get_slot,2}
+calls=636 1
+1 4588
+cfl=dict
+cfn={dict,get_bucket,2}
+calls=636 1
+1 3292
+cfl=pseudo
+cfn=garbage_collect
+calls=1 1
+1 49
+cfl=pseudo
+cfn=suspend
+calls=2 1
+1 41
+fl=dict
+fn={dict,find_key,2}
+1 18476
+cfl=dict
+cfn={dict,find_key,2}
+calls=5280 1
+1 0
+fl=dict
+fn={dict,rehash,4}
+1 8389
+cfl=erlang
+cfn={erlang,phash,2}
+calls=1111 1
+1 2872
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 7
+cfl=dict
+cfn={dict,rehash,4}
+calls=1111 1
+1 0
+fl=erlang
+fn={erlang,phash,2}
+1 10641
+fl=erlang
+fn={erlang,setelement,3}
+1 10615
+fl=dict
+fn={dict,get_bucket,2}
+1 5723
+cfl=dict
+cfn={dict,get_bucket_s,2}
+calls=1934 1
+1 4356
+fl=dict
+fn={dict,fetch_val,2}
+1 6944
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 23
+cfl=dict
+cfn={dict,fetch_val,2}
+calls=1809 1
+1 0
+fl=dict
+fn={dict,get_bucket_s,2}
+1 4691
+fl=memoize
+fn={memoize,'-multz/2-lc$^1/1-1-',2}
+1 707
+cfl=dict
+cfn={dict,fetch,2}
+calls=100 1
+1 3501
+cfl=memoize
+cfn={memoize,'-multz/2-lc$^1/1-1-',2}
+calls=100 1
+1 0
+fl=memoize
+fn={memoize,'-multz/1-fun-0-',2}
+1 2306
+cfl=memoize
+cfn={memoize,multiply,2}
+calls=762 1
+1 1898
+fl=memoize
+fn={memoize,replacements,1}
+1 15
+cfl=memoize
+cfn={memoize,'-replacements/1-lc$^0/1-0-',2}
+calls=2 1
+1 2062
+cfl=lists
+cfn={lists,filter,2}
+calls=2 1
+1 1962
+fl=dict
+fn={dict,put_bucket_s,3}
+1 2347
+cfl=erlang
+cfn={erlang,setelement,3}
+calls=628 1
+1 1398
+fl=memoize
+fn={memoize,'-replacements/1-lc$^0/1-0-',2}
+1 1458
+cfl=erlang
+cfn={erlang,'--',2}
+calls=200 1
+1 604
+cfl=memoize
+cfn={memoize,'-replacements/1-lc$^0/1-0-',2}
+calls=200 1
+1 0
+fl=lists
+fn={lists,filter,2}
+1 7
+cfl=lists
+cfn={lists,'-filter/2-lc$^0/1-0-',2}
+calls=2 1
+1 1955
+fl=lists
+fn={lists,'-filter/2-lc$^0/1-0-',2}
+1 1384
+cfl=memoize
+cfn={memoize,'-replacements/1-fun-1-',1}
+calls=200 1
+1 496
+cfl=pseudo
+cfn=garbage_collect
+calls=1 1
+1 75
+cfl=lists
+cfn={lists,'-filter/2-lc$^0/1-0-',2}
+calls=200 1
+1 0
+fl=memoize
+fn={memoize,multiply,2}
+1 1898
+fl=erlang
+fn={erlang,'++',2}
+1 1705
+fl=lists
+fn={lists,reverse,2}
+1 1684
+fl=pseudo
+fn=garbage_collect
+1 859
+fl=erlang
+fn={erlang,'--',2}
+1 604
+fl=memoize
+fn={memoize,'-replacements/1-fun-1-',1}
+1 496
+fl=pseudo
+fn=suspend
+1 471
+fl=memoize
+fn={memoize,'-multz/2-lc$^2/1-0-',1}
+1 445
+cfl=memoize
+cfn={memoize,'-multz/2-lc$^2/1-0-',1}
+calls=100 1
+1 0
+fl=dict
+fn={dict,maybe_expand_segs,1}
+1 359
+cfl=dict
+cfn={dict,expand_segs,2}
+calls=4 1
+1 9
+cfl=erlang
+cfn={erlang,setelement,3}
+calls=4 1
+1 8
+fl=fprof
+fn={fprof,trace,1}
+1 4
+cfl=fprof
+cfn={fprof,call,1}
+calls=1 1
+1 28
+fl=fprof
+fn={fprof,call,1}
+1 7
+cfl=fprof
+cfn={fprof,just_call,2}
+calls=1 1
+1 18
+cfl=erlang
+cfn={erlang,whereis,1}
+calls=1 1
+1 3
+fl=dict
+fn={dict,new,0}
+1 10
+cfl=dict
+cfn={dict,mk_seg,1}
+calls=1 1
+1 3
+fl=erlang
+fn={erlang,demonitor,1}
+1 10
+fl=dict
+fn={dict,expand_segs,2}
+1 9
+fl=erlang
+fn={erlang,monitor,2}
+1 4
+fl=erlang
+fn={erlang,whereis,1}
+1 3
+fl=dict
+fn={dict,mk_seg,1}
+1 3
+fl=pseudo
+fn=undefined
+1 0
+cfl=prof_memo
+cfn={prof_memo,fprofile,3}
+calls=0 1
+1 229461
+cfl=fprof
+cfn={fprof,just_call,2}
+calls=0 1
+1 31

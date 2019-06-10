@@ -1,0 +1,438 @@
+%% Analysis results:
+{  analysis_options,
+ [{callers, true},
+  {sort, acc},
+  {totals, false},
+  {details, true}]}.
+
+%                                               CNT       ACC       OWN        
+[{ totals,                                     502404, 2256.319, 2250.620}].  %%%
+
+
+%                                               CNT       ACC       OWN        
+[{ "<0.8.0>",                                  502404,undefined, 2250.620}].   %%
+
+{[{{prof_memo,fprofile,3},                        0, 2256.246,    0.010},      
+  {undefined,                                     0,    0.033,    0.023},      
+  {{fprof,call,1},                                1,    0.023,    0.019}],     
+ { {fprof,just_call,2},                           1, 2256.302,    0.052},     %
+ [{{memoize,multm,1},                             1, 2256.236,    0.014},      
+  {{erlang,demonitor,1},                          1,    0.010,    0.010},      
+  {{erlang,monitor,2},                            1,    0.004,    0.004},      
+  {suspend,                                       1,    0.000,    0.000}]}.    
+
+{[{undefined,                                     0, 2256.286,    0.003}],     
+ { {prof_memo,fprofile,3},                        0, 2256.286,    0.003},     %
+ [{{fprof,just_call,2},                           0, 2256.246,    0.010},      
+  {{fprof,trace,1},                               1,    0.037,    0.004}]}.    
+
+{[{{fprof,just_call,2},                           1, 2256.236,    0.014}],     
+ { {memoize,multm,1},                             1, 2256.236,    0.014},     %
+ [{{memoize,multm,2},                             1, 2256.222,    0.012}]}.    
+
+{[{{memoize,multm,1},                             1, 2256.222,    0.012}],     
+ { {memoize,multm,2},                             1, 2256.222,    0.012},     %
+ [{{memoize,memom,2},                             1, 2129.220,    0.018},      
+  {{memoize,'-multm/2-lc$^0/1-0-',2},             1,  124.996,    0.353},      
+  {{memoize,replacements,1},                      1,    1.994,    0.008}]}.    
+
+{[{{memoize,multm,2},                             1, 2129.220,    0.018}],     
+ { {memoize,memom,2},                             1, 2129.220,    0.018},     %
+ [{{memoize,memo,2},                              1, 2129.153,    0.012},      
+  {{lists,reverse,1},                             1,    0.031,    0.014},      
+  {{dict,new,0},                                  1,    0.018,    0.013}]}.    
+
+{[{{memoize,memom,2},                             1, 2129.153,    0.012},      
+  {{memoize,memo,2},                            100,    0.000,    0.921}],     
+ { {memoize,memo,2},                            101, 2129.153,    0.933},     %
+ [{{memoize,add_root,2},                        100, 2127.995,    1.458},      
+  {{memoize,dump_graph,1},                      100,    0.225,    0.225},      
+  {{memoize,memo,2},                            100,    0.000,    0.921}]}.    
+
+{[{{memoize,memo,2},                            100, 2127.995,    1.458}],     
+ { {memoize,add_root,2},                        100, 2127.995,    1.458},     %
+ [{{memoize,add_child_by_key,3},                100, 2113.871,    1.228},      
+  {{dict,store,3},                              100,   12.181,    0.924},      
+  {{erlang,setelement,3},                       200,    0.485,    0.485}]}.    
+
+{[{{memoize,add_root,2},                        100, 2113.871,    1.228},      
+  {{memoize,add_child,3},                      4950,    0.000,   53.009}],     
+ { {memoize,add_child_by_key,3},               5050, 2113.871,   54.237},     %
+ [{{memoize,add_child,3},                      4950, 2103.974,   82.351},      
+  {{dict,fetch,2},                             9900,  416.606,  100.546},      
+  {{memoize,dump_graph,1},                     4950,   11.420,   11.317},      
+  {suspend,                                       4,    0.080,    0.000}]}.    
+
+{[{{memoize,add_child_by_key,3},               4950, 2103.974,   82.351}],     
+ { {memoize,add_child,3},                      4950, 2103.974,   82.351},     %
+ [{{dict,update,3},                            9900,  746.221,   75.396},      
+  {{dict,store,3},                             4950,  502.266,   42.936},      
+  {{memoize,child,3},                          4950,  289.191,   52.689},      
+  {{erlang,setelement,3},                      4950,   11.227,   11.227},      
+  {garbage_collect,                               2,    0.197,    0.197},      
+  {suspend,                                       3,    0.075,    0.000},      
+  {{memoize,add_child_by_key,3},               4950,    0.000,   53.009}]}.    
+
+{[{{dict,update,3},                            9900,  591.168,  130.918},      
+  {{dict,store,3},                             5050,  258.327,   68.327}],     
+ { {dict,on_bucket,3},                         14950,  849.495,  199.245},     %
+ [{{dict,'-update/3-fun-0-',3},                9900,  390.438,   30.851},      
+  {{dict,'-store/3-fun-0-',3},                 5050,  154.864,   15.857},      
+  {{erlang,setelement,3},                      44850,  100.398,  100.398},      
+  {garbage_collect,                              35,    4.183,    4.183},      
+  {suspend,                                      17,    0.367,    0.000}]}.    
+
+{[{{memoize,add_child,3},                      9900,  746.221,   75.396}],     
+ { {dict,update,3},                            9900,  746.221,   75.396},     %
+ [{{dict,on_bucket,3},                         9900,  591.168,  130.918},      
+  {{dict,get_slot,2},                          9900,   79.145,   49.314},      
+  {suspend,                                      11,    0.347,    0.000},      
+  {garbage_collect,                               2,    0.165,    0.165}]}.    
+
+{[{{memoize,add_child_by_key,3},               9900,  416.606,  100.546},      
+  {{memoize,child,3},                          4950,  195.830,   50.170},      
+  {{memoize,fetch,2},                           666,   22.602,    7.209}],     
+ { {dict,fetch,2},                             15516,  635.038,  157.925},     %
+ [{{dict,fetch_val,2},                         15516,  265.131,   48.855},      
+  {{dict,get_slot,2},                          15516,  125.014,   77.494},      
+  {{dict,get_bucket,2},                        15516,   85.733,   48.716},      
+  {suspend,                                      24,    0.750,    0.000},      
+  {garbage_collect,                               6,    0.485,    0.485}]}.    
+
+{[{{memoize,add_child,3},                      4950,  502.266,   42.936},      
+  {{memoize,add_root,2},                        100,   12.181,    0.924}],     
+ { {dict,store,3},                             5050,  514.447,   43.860},     %
+ [{{dict,on_bucket,3},                         5050,  258.327,   68.327},      
+  {{dict,maybe_expand,2},                      5050,  171.777,   15.760},      
+  {{dict,get_slot,2},                          5050,   40.355,   25.286},      
+  {garbage_collect,                               1,    0.093,    0.093},      
+  {suspend,                                       1,    0.035,    0.000}]}.    
+
+{[{{dict,on_bucket,3},                         9900,  390.438,   30.851}],     
+ { {dict,'-update/3-fun-0-',3},                9900,  390.438,   30.851},     %
+ [{{dict,update_bkt,3},                        9900,  359.535,   82.672},      
+  {suspend,                                       2,    0.052,    0.000}]}.    
+
+{[{{dict,'-update/3-fun-0-',3},                9900,  359.535,   82.672},      
+  {{dict,update_bkt,3},                        50295,    0.000,  198.984}],     
+ { {dict,update_bkt,3},                        60195,  359.535,  281.656},     %
+ [{{memoize,'-add_child/3-fun-0-',2},          4950,   36.829,   24.861},      
+  {{memoize,'-add_child/3-fun-1-',2},          4950,   35.869,   24.305},      
+  {garbage_collect,                              22,    4.167,    4.167},      
+  {suspend,                                      43,    1.014,    0.000},      
+  {{dict,update_bkt,3},                        50295,    0.000,  198.984}]}.    
+
+{[{{memoize,add_child,3},                      4950,  289.191,   52.689}],     
+ { {memoize,child,3},                          4950,  289.191,   52.689},     %
+ [{{dict,fetch,2},                             4950,  195.830,   50.170},      
+  {{memoize,'-multm/1-fun-0-',2},              4950,   28.869,   15.283},      
+  {{erlang,'++',2},                            4950,   11.263,   11.263},      
+  {garbage_collect,                               6,    0.460,    0.460},      
+  {suspend,                                       3,    0.080,    0.000}]}.    
+
+{[{{dict,fetch,2},                             15516,  265.131,   48.855},      
+  {{dict,fetch_val,2},                         74777,    0.000,  215.619}],     
+ { {dict,fetch_val,2},                         90293,  265.131,  264.474},     %
+ [{suspend,                                      22,    0.559,    0.000},      
+  {garbage_collect,                               1,    0.098,    0.098},      
+  {{dict,fetch_val,2},                         74777,    0.000,  215.619}]}.    
+
+{[{{dict,fetch,2},                             15516,  125.014,   77.494},      
+  {{dict,update,3},                            9900,   79.145,   49.314},      
+  {{dict,store,3},                             5050,   40.355,   25.286},      
+  {{dict,is_key,2},                            1232,   10.199,    6.732}],     
+ { {dict,get_slot,2},                          31698,  254.713,  158.826},     %
+ [{{erlang,phash,2},                           31698,   93.909,   93.909},      
+  {garbage_collect,                              20,    1.640,    1.640},      
+  {suspend,                                      14,    0.338,    0.000}]}.    
+
+{[{{dict,store,3},                             5050,  171.777,   15.760}],     
+ { {dict,maybe_expand,2},                      5050,  171.777,   15.760},     %
+ [{{dict,maybe_expand_aux,2},                  5050,  155.938,   36.528},      
+  {suspend,                                       4,    0.079,    0.000}]}.    
+
+{[{{dict,maybe_expand,2},                      5050,  155.938,   36.528}],     
+ { {dict,maybe_expand_aux,2},                  5050,  155.938,   36.528},     %
+ [{{dict,rehash,4},                             994,   80.338,   19.159},      
+  {{dict,put_bucket_s,3},                      1988,   25.188,   15.629},      
+  {{erlang,setelement,3},                      4056,    9.058,    9.058},      
+  {{dict,maybe_expand_segs,1},                  994,    2.431,    2.289},      
+  {{dict,get_bucket_s,2},                       994,    2.348,    2.348},      
+  {suspend,                                       1,    0.047,    0.000}]}.    
+
+{[{{dict,on_bucket,3},                         5050,  154.864,   15.857}],     
+ { {dict,'-store/3-fun-0-',3},                 5050,  154.864,   15.857},     %
+ [{{dict,store_bkt_val,3},                     5050,  138.991,   39.923},      
+  {suspend,                                       1,    0.016,    0.000}]}.    
+
+{[{{dict,on_bucket,3},                         44850,  100.398,  100.398},      
+  {{memoize,'-add_child/3-fun-0-',2},          4950,   11.385,   11.385},      
+  {{memoize,'-add_child/3-fun-1-',2},          4950,   11.240,   11.240},      
+  {{memoize,add_child,3},                      4950,   11.227,   11.227},      
+  {{dict,put_bucket_s,3},                      3976,    9.102,    9.102},      
+  {{dict,maybe_expand_aux,2},                  4056,    9.058,    9.058},      
+  {{memoize,add_root,2},                        200,    0.485,    0.485},      
+  {{dict,maybe_expand_segs,1},                    6,    0.013,    0.013}],     
+ { {erlang,setelement,3},                      67938,  152.908,  152.908},     %
+ [ ]}.
+
+{[{{dict,'-store/3-fun-0-',3},                 5050,  138.991,   39.923},      
+  {{dict,store_bkt_val,3},                     26086,    0.000,   97.975}],     
+ { {dict,store_bkt_val,3},                     31136,  138.991,  137.898},     %
+ [{garbage_collect,                               8,    0.622,    0.622},      
+  {suspend,                                      10,    0.471,    0.000},      
+  {{dict,store_bkt_val,3},                     26086,    0.000,   97.975}]}.    
+
+{[{{memoize,multm,2},                             1,  124.996,    0.353},      
+  {{memoize,'-multm/2-lc$^0/1-0-',2},           100,    0.000,    0.386}],     
+ { {memoize,'-multm/2-lc$^0/1-0-',2},           101,  124.996,    0.739},     %
+ [{{memoize,fetch,2},                           100,  124.257,    8.063},      
+  {{memoize,'-multm/2-lc$^0/1-0-',2},           100,    0.000,    0.386}]}.    
+
+{[{{memoize,'-multm/2-lc$^0/1-0-',2},           100,  124.257,    8.063},      
+  {{memoize,fetch,2},                          1132,    0.000,    5.712}],     
+ { {memoize,fetch,2},                          1232,  124.257,   13.775},     %
+ [{{dict,is_key,2},                            1232,   46.276,   11.190},      
+  {{lists,split,2},                             566,   38.247,    3.039},      
+  {{dict,fetch,2},                              666,   22.602,    7.209},      
+  {{memoize,'-multm/1-fun-0-',2},               566,    3.307,    1.787},      
+  {suspend,                                       2,    0.050,    0.000},      
+  {{memoize,fetch,2},                          1132,    0.000,    5.712}]}.    
+
+{[{{dict,get_slot,2},                          31698,   93.909,   93.909},      
+  {{dict,rehash,4},                            7387,   22.487,   22.487}],     
+ { {erlang,phash,2},                           39085,  116.396,  116.396},     %
+ [ ]}.
+
+{[{{dict,fetch,2},                             15516,   85.733,   48.716},      
+  {{dict,is_key,2},                            1232,    7.293,    4.134}],     
+ { {dict,get_bucket,2},                        16748,   93.026,   52.850},     %
+ [{{dict,get_bucket_s,2},                      16748,   39.829,   39.686},      
+  {suspend,                                       3,    0.347,    0.000}]}.    
+
+{[{{dict,maybe_expand_aux,2},                   994,   80.338,   19.159},      
+  {{dict,rehash,4},                            7387,    0.000,   38.271}],     
+ { {dict,rehash,4},                            8381,   80.338,   57.430},     %
+ [{{erlang,phash,2},                           7387,   22.487,   22.487},      
+  {garbage_collect,                               4,    0.383,    0.383},      
+  {suspend,                                       2,    0.038,    0.000},      
+  {{dict,rehash,4},                            7387,    0.000,   38.271}]}.    
+
+{[{{memoize,fetch,2},                          1232,   46.276,   11.190}],     
+ { {dict,is_key,2},                            1232,   46.276,   11.190},     %
+ [{{dict,find_key,2},                          1232,   17.594,    4.180},      
+  {{dict,get_slot,2},                          1232,   10.199,    6.732},      
+  {{dict,get_bucket,2},                        1232,    7.293,    4.134}]}.    
+
+{[{{dict,get_bucket,2},                        16748,   39.829,   39.686},      
+  {{dict,maybe_expand_aux,2},                   994,    2.348,    2.348}],     
+ { {dict,get_bucket_s,2},                      17742,   42.177,   42.034},     %
+ [{suspend,                                       6,    0.143,    0.000}]}.    
+
+{[{{memoize,fetch,2},                           566,   38.247,    3.039}],     
+ { {lists,split,2},                             566,   38.247,    3.039},     %
+ [{{lists,split,3},                             566,   35.208,    1.944}]}.    
+
+{[{{dict,update_bkt,3},                        4950,   36.829,   24.861}],     
+ { {memoize,'-add_child/3-fun-0-',2},          4950,   36.829,   24.861},     %
+ [{{erlang,setelement,3},                      4950,   11.385,   11.385},      
+  {garbage_collect,                               4,    0.459,    0.459},      
+  {suspend,                                       4,    0.124,    0.000}]}.    
+
+{[{{dict,update_bkt,3},                        4950,   35.869,   24.305}],     
+ { {memoize,'-add_child/3-fun-1-',2},          4950,   35.869,   24.305},     %
+ [{{erlang,setelement,3},                      4950,   11.240,   11.240},      
+  {garbage_collect,                               4,    0.324,    0.324}]}.    
+
+{[{{lists,split,2},                             566,   35.208,    1.944},      
+  {{lists,split,3},                            9225,    0.000,   31.344}],     
+ { {lists,split,3},                            9791,   35.208,   33.288},     %
+ [{{lists,reverse,2},                           566,    1.421,    1.421},      
+  {suspend,                                       6,    0.289,    0.000},      
+  {garbage_collect,                               4,    0.210,    0.210},      
+  {{lists,split,3},                            9225,    0.000,   31.344}]}.    
+
+{[{{memoize,child,3},                          4950,   28.869,   15.283},      
+  {{memoize,fetch,2},                           566,    3.307,    1.787}],     
+ { {memoize,'-multm/1-fun-0-',2},              5516,   32.176,   17.070},     %
+ [{{memoize,multiply,2},                       5516,   15.036,   14.703},      
+  {suspend,                                       4,    0.070,    0.000}]}.    
+
+{[{{dict,maybe_expand_aux,2},                  1988,   25.188,   15.629}],     
+ { {dict,put_bucket_s,3},                      1988,   25.188,   15.629},     %
+ [{{erlang,setelement,3},                      3976,    9.102,    9.102},      
+  {garbage_collect,                               4,    0.288,    0.288},      
+  {suspend,                                       8,    0.169,    0.000}]}.    
+
+{[{{dict,is_key,2},                            1232,   17.594,    4.180},      
+  {{dict,find_key,2},                          4148,    0.000,   13.377}],     
+ { {dict,find_key,2},                          5380,   17.594,   17.557},     %
+ [{suspend,                                       1,    0.037,    0.000},      
+  {{dict,find_key,2},                          4148,    0.000,   13.377}]}.    
+
+{[{{memoize,'-multm/1-fun-0-',2},              5516,   15.036,   14.703}],     
+ { {memoize,multiply,2},                       5516,   15.036,   14.703},     %
+ [{garbage_collect,                               4,    0.314,    0.314},      
+  {suspend,                                       1,    0.019,    0.000}]}.    
+
+{[{{dict,on_bucket,3},                           35,    4.183,    4.183},      
+  {{dict,update_bkt,3},                          22,    4.167,    4.167},      
+  {{dict,get_slot,2},                            20,    1.640,    1.640},      
+  {{dict,store_bkt_val,3},                        8,    0.622,    0.622},      
+  {{dict,fetch,2},                                6,    0.485,    0.485},      
+  {{memoize,child,3},                             6,    0.460,    0.460},      
+  {{memoize,'-add_child/3-fun-0-',2},             4,    0.459,    0.459},      
+  {{dict,rehash,4},                               4,    0.383,    0.383},      
+  {{memoize,'-add_child/3-fun-1-',2},             4,    0.324,    0.324},      
+  {{memoize,multiply,2},                          4,    0.314,    0.314},      
+  {{dict,put_bucket_s,3},                         4,    0.288,    0.288},      
+  {{lists,split,3},                               4,    0.210,    0.210},      
+  {{memoize,add_child,3},                         2,    0.197,    0.197},      
+  {{dict,update,3},                               2,    0.165,    0.165},      
+  {{dict,fetch_val,2},                            1,    0.098,    0.098},      
+  {{dict,store,3},                                1,    0.093,    0.093}],     
+ { garbage_collect,                             127,   14.088,   14.088},     %
+ [ ]}.
+
+{[{{memoize,add_child_by_key,3},               4950,   11.420,   11.317},      
+  {{memoize,memo,2},                            100,    0.225,    0.225}],     
+ { {memoize,dump_graph,1},                     5050,   11.645,   11.542},     %
+ [{suspend,                                       4,    0.103,    0.000}]}.    
+
+{[{{memoize,child,3},                          4950,   11.263,   11.263},      
+  {{dict,expand_segs,2},                          1,    0.002,    0.002}],     
+ { {erlang,'++',2},                            4951,   11.265,   11.265},     %
+ [ ]}.
+
+{[{{dict,update_bkt,3},                          43,    1.014,    0.000},      
+  {{dict,fetch,2},                               24,    0.750,    0.000},      
+  {{dict,fetch_val,2},                           22,    0.559,    0.000},      
+  {{dict,store_bkt_val,3},                       10,    0.471,    0.000},      
+  {{dict,on_bucket,3},                           17,    0.367,    0.000},      
+  {{dict,update,3},                              11,    0.347,    0.000},      
+  {{dict,get_bucket,2},                           3,    0.347,    0.000},      
+  {{dict,get_slot,2},                            14,    0.338,    0.000},      
+  {{lists,split,3},                               6,    0.289,    0.000},      
+  {{dict,put_bucket_s,3},                         8,    0.169,    0.000},      
+  {{dict,get_bucket_s,2},                         6,    0.143,    0.000},      
+  {{memoize,'-add_child/3-fun-0-',2},             4,    0.124,    0.000},      
+  {{memoize,dump_graph,1},                        4,    0.103,    0.000},      
+  {{memoize,child,3},                             3,    0.080,    0.000},      
+  {{memoize,add_child_by_key,3},                  4,    0.080,    0.000},      
+  {{dict,maybe_expand,2},                         4,    0.079,    0.000},      
+  {{memoize,add_child,3},                         3,    0.075,    0.000},      
+  {{memoize,'-multm/1-fun-0-',2},                 4,    0.070,    0.000},      
+  {{dict,'-update/3-fun-0-',3},                   2,    0.052,    0.000},      
+  {{memoize,fetch,2},                             2,    0.050,    0.000},      
+  {{dict,maybe_expand_aux,2},                     1,    0.047,    0.000},      
+  {{dict,rehash,4},                               2,    0.038,    0.000},      
+  {{dict,find_key,2},                             1,    0.037,    0.000},      
+  {{dict,store,3},                                1,    0.035,    0.000},      
+  {{memoize,multiply,2},                          1,    0.019,    0.000},      
+  {{dict,'-store/3-fun-0-',3},                    1,    0.016,    0.000},      
+  {{fprof,just_call,2},                           1,    0.000,    0.000}],     
+ { suspend,                                     202,    5.699,    0.000},     %
+ [ ]}.
+
+{[{{dict,maybe_expand_aux,2},                   994,    2.431,    2.289}],     
+ { {dict,maybe_expand_segs,1},                  994,    2.431,    2.289},     %
+ [{{dict,expand_segs,2},                          6,    0.129,    0.027},      
+  {{erlang,setelement,3},                         6,    0.013,    0.013}]}.    
+
+{[{{memoize,multm,2},                             1,    1.994,    0.008}],     
+ { {memoize,replacements,1},                      1,    1.994,    0.008},     %
+ [{{lists,filter,2},                              1,    1.103,    0.009},      
+  {{memoize,'-replacements/1-lc$^0/1-0-',2},      1,    0.883,    0.293}]}.    
+
+{[{{lists,split,3},                             566,    1.421,    1.421},      
+  {{lists,reverse,1},                             1,    0.017,    0.017}],     
+ { {lists,reverse,2},                           567,    1.438,    1.438},     %
+ [ ]}.
+
+{[{{memoize,replacements,1},                      1,    1.103,    0.009}],     
+ { {lists,filter,2},                              1,    1.103,    0.009},     %
+ [{{lists,'-filter/2-lc$^0/1-0-',2},              1,    1.094,    0.451}]}.    
+
+{[{{lists,filter,2},                              1,    1.094,    0.451},      
+  {{lists,'-filter/2-lc$^0/1-0-',2},            100,    0.000,    0.379}],     
+ { {lists,'-filter/2-lc$^0/1-0-',2},            101,    1.094,    0.830},     %
+ [{{memoize,'-replacements/1-fun-1-',1},        100,    0.264,    0.264},      
+  {{lists,'-filter/2-lc$^0/1-0-',2},            100,    0.000,    0.379}]}.    
+
+{[{{memoize,replacements,1},                      1,    0.883,    0.293},      
+  {{memoize,'-replacements/1-lc$^0/1-0-',2},    100,    0.000,    0.319}],     
+ { {memoize,'-replacements/1-lc$^0/1-0-',2},    101,    0.883,    0.612},     %
+ [{{erlang,'--',2},                             100,    0.271,    0.271},      
+  {{memoize,'-replacements/1-lc$^0/1-0-',2},    100,    0.000,    0.319}]}.    
+
+{[{{memoize,'-replacements/1-lc$^0/1-0-',2},    100,    0.271,    0.271}],     
+ { {erlang,'--',2},                             100,    0.271,    0.271},     %
+ [ ]}.
+
+{[{{lists,'-filter/2-lc$^0/1-0-',2},            100,    0.264,    0.264}],     
+ { {memoize,'-replacements/1-fun-1-',1},        100,    0.264,    0.264},     %
+ [ ]}.
+
+{[{{dict,maybe_expand_segs,1},                    6,    0.129,    0.027}],     
+ { {dict,expand_segs,2},                          6,    0.129,    0.027},     %
+ [{{lists,duplicate,2},                           1,    0.095,    0.003},      
+  {{erlang,tuple_to_list,1},                      1,    0.003,    0.003},      
+  {{erlang,list_to_tuple,1},                      1,    0.002,    0.002},      
+  {{erlang,'++',2},                               1,    0.002,    0.002}]}.    
+
+{[{{dict,expand_segs,2},                          1,    0.095,    0.003}],     
+ { {lists,duplicate,2},                           1,    0.095,    0.003},     %
+ [{{lists,duplicate,3},                           1,    0.092,    0.003}]}.    
+
+{[{{lists,duplicate,2},                           1,    0.092,    0.003},      
+  {{lists,duplicate,3},                          32,    0.000,    0.089}],     
+ { {lists,duplicate,3},                          33,    0.092,    0.092},     %
+ [{{lists,duplicate,3},                          32,    0.000,    0.089}]}.    
+
+{[{{prof_memo,fprofile,3},                        1,    0.037,    0.004}],     
+ { {fprof,trace,1},                               1,    0.037,    0.004},     %
+ [{{fprof,call,1},                                1,    0.033,    0.006}]}.    
+
+{[{{fprof,trace,1},                               1,    0.033,    0.006}],     
+ { {fprof,call,1},                                1,    0.033,    0.006},     %
+ [{{fprof,just_call,2},                           1,    0.023,    0.019},      
+  {{erlang,whereis,1},                            1,    0.004,    0.004}]}.    
+
+{[{{memoize,memom,2},                             1,    0.031,    0.014}],     
+ { {lists,reverse,1},                             1,    0.031,    0.014},     %
+ [{{lists,reverse,2},                             1,    0.017,    0.017}]}.    
+
+{[{{memoize,memom,2},                             1,    0.018,    0.013}],     
+ { {dict,new,0},                                  1,    0.018,    0.013},     %
+ [{{dict,mk_seg,1},                               1,    0.005,    0.005}]}.    
+
+{[{{fprof,just_call,2},                           1,    0.010,    0.010}],     
+ { {erlang,demonitor,1},                          1,    0.010,    0.010},     %
+ [ ]}.
+
+{[{{dict,new,0},                                  1,    0.005,    0.005}],     
+ { {dict,mk_seg,1},                               1,    0.005,    0.005},     %
+ [ ]}.
+
+{[{{fprof,call,1},                                1,    0.004,    0.004}],     
+ { {erlang,whereis,1},                            1,    0.004,    0.004},     %
+ [ ]}.
+
+{[{{fprof,just_call,2},                           1,    0.004,    0.004}],     
+ { {erlang,monitor,2},                            1,    0.004,    0.004},     %
+ [ ]}.
+
+{[{{dict,expand_segs,2},                          1,    0.003,    0.003}],     
+ { {erlang,tuple_to_list,1},                      1,    0.003,    0.003},     %
+ [ ]}.
+
+{[{{dict,expand_segs,2},                          1,    0.002,    0.002}],     
+ { {erlang,list_to_tuple,1},                      1,    0.002,    0.002},     %
+ [ ]}.
+
+{[ ],
+ { undefined,                                     0,    0.000,    0.000},     %
+ [{{prof_memo,fprofile,3},                        0, 2256.286,    0.003},      
+  {{fprof,just_call,2},                           0,    0.033,    0.023}]}.    
+
+

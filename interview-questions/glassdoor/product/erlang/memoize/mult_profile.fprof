@@ -1,0 +1,131 @@
+%% Analysis results:
+{  analysis_options,
+ [{callers, true},
+  {sort, acc},
+  {totals, false},
+  {details, true}]}.
+
+%                                               CNT       ACC       OWN        
+[{ totals,                                     30329,  115.964,  115.799}].  %%%
+
+
+%                                               CNT       ACC       OWN        
+[{ "<0.8.0>",                                  30329,undefined,  115.799}].   %%
+
+{[{{prof_memo,fprofile,3},                        0,  115.894,    0.006},      
+  {{fprof,call,1},                                1,    0.030,    0.019},      
+  {undefined,                                     0,    0.025,    0.017}],     
+ { {fprof,just_call,2},                           1,  115.949,    0.042},     %
+ [{{memoize,mult,1},                              1,  115.888,    0.004},      
+  {{erlang,monitor,2},                            1,    0.011,    0.011},      
+  {{erlang,demonitor,1},                          1,    0.008,    0.008},      
+  {suspend,                                       1,    0.000,    0.000}]}.    
+
+{[{undefined,                                     0,  115.939,    0.003}],     
+ { {prof_memo,fprofile,3},                        0,  115.939,    0.003},     %
+ [{{fprof,just_call,2},                           0,  115.894,    0.006},      
+  {{fprof,trace,1},                               1,    0.042,    0.003}]}.    
+
+{[{{fprof,just_call,2},                           1,  115.888,    0.004}],     
+ { {memoize,mult,1},                              1,  115.888,    0.004},     %
+ [{{memoize,mult,2},                              1,  115.884,    0.005}]}.    
+
+{[{{memoize,mult,1},                              1,  115.884,    0.005}],     
+ { {memoize,mult,2},                              1,  115.884,    0.005},     %
+ [{{memoize,'-mult/2-lc$^0/1-0-',2},              1,  114.096,    0.313},      
+  {{memoize,replacements,1},                      1,    1.783,    0.005}]}.    
+
+{[{{memoize,mult,2},                              1,  114.096,    0.313},      
+  {{memoize,'-mult/2-lc$^0/1-0-',2},            100,    0.000,    0.360}],     
+ { {memoize,'-mult/2-lc$^0/1-0-',2},            101,  114.096,    0.673},     %
+ [{{lists,foldl,3},                             100,  113.423,    0.577},      
+  {{memoize,'-mult/2-lc$^0/1-0-',2},            100,    0.000,    0.360}]}.    
+
+{[{{memoize,'-mult/2-lc$^0/1-0-',2},            100,  113.423,    0.577},      
+  {{lists,foldl,3},                            9900,    0.000,   57.754}],     
+ { {lists,foldl,3},                            10000,  113.423,   58.331},     %
+ [{{memoize,'-mult/1-fun-0-',2},               9900,   54.830,   30.130},      
+  {garbage_collect,                               2,    0.155,    0.155},      
+  {suspend,                                       7,    0.107,    0.000},      
+  {{lists,foldl,3},                            9900,    0.000,   57.754}]}.    
+
+{[{{lists,foldl,3},                            9900,   54.830,   30.130}],     
+ { {memoize,'-mult/1-fun-0-',2},               9900,   54.830,   30.130},     %
+ [{{memoize,multiply,2},                       9900,   24.660,   24.571},      
+  {garbage_collect,                               1,    0.029,    0.029},      
+  {suspend,                                       1,    0.011,    0.000}]}.    
+
+{[{{memoize,'-mult/1-fun-0-',2},               9900,   24.660,   24.571}],     
+ { {memoize,multiply,2},                       9900,   24.660,   24.571},     %
+ [{suspend,                                       2,    0.047,    0.000},      
+  {garbage_collect,                               2,    0.042,    0.042}]}.    
+
+{[{{memoize,mult,2},                              1,    1.783,    0.005}],     
+ { {memoize,replacements,1},                      1,    1.783,    0.005},     %
+ [{{memoize,'-replacements/1-lc$^0/1-0-',2},      1,    1.044,    0.280},      
+  {{lists,filter,2},                              1,    0.734,    0.003}]}.    
+
+{[{{memoize,replacements,1},                      1,    1.044,    0.280},      
+  {{memoize,'-replacements/1-lc$^0/1-0-',2},    100,    0.000,    0.500}],     
+ { {memoize,'-replacements/1-lc$^0/1-0-',2},    101,    1.044,    0.780},     %
+ [{{erlang,'--',2},                             100,    0.264,    0.264},      
+  {{memoize,'-replacements/1-lc$^0/1-0-',2},    100,    0.000,    0.500}]}.    
+
+{[{{memoize,replacements,1},                      1,    0.734,    0.003}],     
+ { {lists,filter,2},                              1,    0.734,    0.003},     %
+ [{{lists,'-filter/2-lc$^0/1-0-',2},              1,    0.731,    0.253}]}.    
+
+{[{{lists,filter,2},                              1,    0.731,    0.253},      
+  {{lists,'-filter/2-lc$^0/1-0-',2},            100,    0.000,    0.291}],     
+ { {lists,'-filter/2-lc$^0/1-0-',2},            101,    0.731,    0.544},     %
+ [{{memoize,'-replacements/1-fun-1-',1},        100,    0.187,    0.187},      
+  {{lists,'-filter/2-lc$^0/1-0-',2},            100,    0.000,    0.291}]}.    
+
+{[{{memoize,'-replacements/1-lc$^0/1-0-',2},    100,    0.264,    0.264}],     
+ { {erlang,'--',2},                             100,    0.264,    0.264},     %
+ [ ]}.
+
+{[{{lists,foldl,3},                               2,    0.155,    0.155},      
+  {{memoize,multiply,2},                          2,    0.042,    0.042},      
+  {{memoize,'-mult/1-fun-0-',2},                  1,    0.029,    0.029}],     
+ { garbage_collect,                               5,    0.226,    0.226},     %
+ [ ]}.
+
+{[{{lists,'-filter/2-lc$^0/1-0-',2},            100,    0.187,    0.187}],     
+ { {memoize,'-replacements/1-fun-1-',1},        100,    0.187,    0.187},     %
+ [ ]}.
+
+{[{{lists,foldl,3},                               7,    0.107,    0.000},      
+  {{memoize,multiply,2},                          2,    0.047,    0.000},      
+  {{memoize,'-mult/1-fun-0-',2},                  1,    0.011,    0.000},      
+  {{fprof,just_call,2},                           1,    0.000,    0.000}],     
+ { suspend,                                      11,    0.165,    0.000},     %
+ [ ]}.
+
+{[{{prof_memo,fprofile,3},                        1,    0.042,    0.003}],     
+ { {fprof,trace,1},                               1,    0.042,    0.003},     %
+ [{{fprof,call,1},                                1,    0.039,    0.006}]}.    
+
+{[{{fprof,trace,1},                               1,    0.039,    0.006}],     
+ { {fprof,call,1},                                1,    0.039,    0.006},     %
+ [{{fprof,just_call,2},                           1,    0.030,    0.019},      
+  {{erlang,whereis,1},                            1,    0.003,    0.003}]}.    
+
+{[{{fprof,just_call,2},                           1,    0.011,    0.011}],     
+ { {erlang,monitor,2},                            1,    0.011,    0.011},     %
+ [ ]}.
+
+{[{{fprof,just_call,2},                           1,    0.008,    0.008}],     
+ { {erlang,demonitor,1},                          1,    0.008,    0.008},     %
+ [ ]}.
+
+{[{{fprof,call,1},                                1,    0.003,    0.003}],     
+ { {erlang,whereis,1},                            1,    0.003,    0.003},     %
+ [ ]}.
+
+{[ ],
+ { undefined,                                     0,    0.000,    0.000},     %
+ [{{prof_memo,fprofile,3},                        0,  115.939,    0.003},      
+  {{fprof,just_call,2},                           0,    0.025,    0.017}]}.    
+
+

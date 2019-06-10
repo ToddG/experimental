@@ -1,0 +1,196 @@
+events: Time
+summary: 115964
+fl=fprof
+fn={fprof,just_call,2}
+1 42
+cfl=memoize
+cfn={memoize,mult,1}
+calls=1 1
+1 115888
+cfl=erlang
+cfn={erlang,monitor,2}
+calls=1 1
+1 11
+cfl=erlang
+cfn={erlang,demonitor,1}
+calls=1 1
+1 8
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 0
+fl=prof_memo
+fn={prof_memo,fprofile,3}
+1 3
+cfl=fprof
+cfn={fprof,just_call,2}
+calls=0 1
+1 115894
+cfl=fprof
+cfn={fprof,trace,1}
+calls=1 1
+1 42
+fl=memoize
+fn={memoize,mult,1}
+1 4
+cfl=memoize
+cfn={memoize,mult,2}
+calls=1 1
+1 115884
+fl=memoize
+fn={memoize,mult,2}
+1 5
+cfl=memoize
+cfn={memoize,'-mult/2-lc$^0/1-0-',2}
+calls=1 1
+1 114096
+cfl=memoize
+cfn={memoize,replacements,1}
+calls=1 1
+1 1783
+fl=memoize
+fn={memoize,'-mult/2-lc$^0/1-0-',2}
+1 673
+cfl=lists
+cfn={lists,foldl,3}
+calls=100 1
+1 113423
+cfl=memoize
+cfn={memoize,'-mult/2-lc$^0/1-0-',2}
+calls=100 1
+1 0
+fl=lists
+fn={lists,foldl,3}
+1 58331
+cfl=memoize
+cfn={memoize,'-mult/1-fun-0-',2}
+calls=9900 1
+1 54830
+cfl=pseudo
+cfn=garbage_collect
+calls=2 1
+1 155
+cfl=pseudo
+cfn=suspend
+calls=7 1
+1 107
+cfl=lists
+cfn={lists,foldl,3}
+calls=9900 1
+1 0
+fl=memoize
+fn={memoize,'-mult/1-fun-0-',2}
+1 30130
+cfl=memoize
+cfn={memoize,multiply,2}
+calls=9900 1
+1 24660
+cfl=pseudo
+cfn=garbage_collect
+calls=1 1
+1 29
+cfl=pseudo
+cfn=suspend
+calls=1 1
+1 11
+fl=memoize
+fn={memoize,multiply,2}
+1 24571
+cfl=pseudo
+cfn=suspend
+calls=2 1
+1 47
+cfl=pseudo
+cfn=garbage_collect
+calls=2 1
+1 42
+fl=memoize
+fn={memoize,replacements,1}
+1 5
+cfl=memoize
+cfn={memoize,'-replacements/1-lc$^0/1-0-',2}
+calls=1 1
+1 1044
+cfl=lists
+cfn={lists,filter,2}
+calls=1 1
+1 734
+fl=memoize
+fn={memoize,'-replacements/1-lc$^0/1-0-',2}
+1 780
+cfl=erlang
+cfn={erlang,'--',2}
+calls=100 1
+1 264
+cfl=memoize
+cfn={memoize,'-replacements/1-lc$^0/1-0-',2}
+calls=100 1
+1 0
+fl=lists
+fn={lists,filter,2}
+1 3
+cfl=lists
+cfn={lists,'-filter/2-lc$^0/1-0-',2}
+calls=1 1
+1 731
+fl=lists
+fn={lists,'-filter/2-lc$^0/1-0-',2}
+1 544
+cfl=memoize
+cfn={memoize,'-replacements/1-fun-1-',1}
+calls=100 1
+1 187
+cfl=lists
+cfn={lists,'-filter/2-lc$^0/1-0-',2}
+calls=100 1
+1 0
+fl=erlang
+fn={erlang,'--',2}
+1 264
+fl=pseudo
+fn=garbage_collect
+1 226
+fl=memoize
+fn={memoize,'-replacements/1-fun-1-',1}
+1 187
+fl=pseudo
+fn=suspend
+1 165
+fl=fprof
+fn={fprof,trace,1}
+1 3
+cfl=fprof
+cfn={fprof,call,1}
+calls=1 1
+1 39
+fl=fprof
+fn={fprof,call,1}
+1 6
+cfl=fprof
+cfn={fprof,just_call,2}
+calls=1 1
+1 30
+cfl=erlang
+cfn={erlang,whereis,1}
+calls=1 1
+1 3
+fl=erlang
+fn={erlang,monitor,2}
+1 11
+fl=erlang
+fn={erlang,demonitor,1}
+1 8
+fl=erlang
+fn={erlang,whereis,1}
+1 3
+fl=pseudo
+fn=undefined
+1 0
+cfl=prof_memo
+cfn={prof_memo,fprofile,3}
+calls=0 1
+1 115939
+cfl=fprof
+cfn={fprof,just_call,2}
+calls=0 1
+1 25

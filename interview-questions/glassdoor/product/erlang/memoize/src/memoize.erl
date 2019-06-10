@@ -13,6 +13,8 @@
 %% escript Entry point
 main(Args) ->
     io:format("Args: ~p~n", [Args]),
+    prof_memo:cprof(),
+    prof_memo:fprof(),
     erlang:halt(0).
 
 mult([]) ->
@@ -59,6 +61,11 @@ multm(L, MultFunc) when is_list(L) andalso length(L) > 0->
 multz([]) ->
     [];
 multz(L) when is_list(L) andalso length(L) > 0 ->
+    %%----------------------------------------------------------
+    %% This is a memoized version of mult, that is memoized
+    %% as part of a binary search.
+    %% Prliminary tests indicate it is 20x slower than mult.
+    %%----------------------------------------------------------
     multz(L, fun multiply/2).
 
 multz(L, MultFunc) ->
@@ -66,10 +73,8 @@ multz(L, MultFunc) ->
                 {_, D1} = fetchz(X, D, MultFunc),
                 D1 end,
     R = replacements(L),
-    % foldl constructs the graph, including the final answers
     D1 = lists:foldl(F, dict:new(), R),
-    % query for the final answers
-    [ V || #node{value=V} <- [dict:fetch(K, D1) || K <- replacements(L)]].
+    [ V || #node{value=V} <- [dict:fetch(K, D1) || K <- R]].
 
 
 fetchz([K], D, _) ->
