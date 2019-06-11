@@ -201,9 +201,9 @@ foldl (97%)
 		|-> multiply (21%)
 ```
 
-So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actually multiplying stuff.
-
-![mult kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/mult-kcachegrind.png)
+* So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actually multiplying stuff.
+* ![mult pprof](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/mult-profile.pprof)
+* ![mult kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/mult-kcachegrind.png)
 
 
 ### Solution #2 `multm`
@@ -255,8 +255,8 @@ So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actual
 
 * Dictionary operations are taking up a *lot* of time
 * Because it's a silly algorithm, every time we add a node, we update two other nodes leading to dict:updates taking 37% of the time and dict:store taking 22%.
-
-![multm kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multm-kcachegrind.png)
+* ![multm pprof](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multm-profile.pprof)
+* ![multm kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multm-kcachegrind.png)
 
 ### Solution #3 `multz`
 
@@ -305,8 +305,8 @@ So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actual
 
 * Dictionary operations are taking up some of the time, about 40%
 * But we only call 'multiply' about 700 times
-
-![multz kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multz-kcachegrind.png)
+* ![multz pprof](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multz-profile.pprof)
+* ![multz kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multz-kcachegrind.png)
 
 
 ## Runtime Stats
