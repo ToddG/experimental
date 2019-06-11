@@ -173,3 +173,140 @@ This is close. Multiply was called 762 times and the model predicted 664 times. 
 To understand what is going on in more detail, we'll have to look at the fprof stats.
 
 
+### Solution #1 `mult`
+
+```erlang
+%% Analysis results:
+%                                               CNT       ACC       OWN        
+[{ totals,                                     30329,  115.964,  115.799}].  %%%
+%                                               CNT       ACC       OWN        
+[{ "<0.8.0>",                                  30329,undefined,  115.799}].   %%
+ { {memoize,mult,2},                              1,  115.884,    0.005},     %
+ { {memoize,'-mult/2-lc$^0/1-0-',2},            101,  114.096,    0.673},     %
+ { {lists,foldl,3},                            10000,  113.423,   58.331},     %
+ { {memoize,'-mult/1-fun-0-',2},               9900,   54.830,   30.130},     %
+ { {memoize,multiply,2},                       9900,   24.660,   24.571},     %
+```
+
+#### Questions
+* Why is foldl called 10,000 times and not 9,900 times?
+* foldl spent ~47% in {memoize,'-mult/1-fun-0-',2} and ~21% in the actual multiply function
+{memoize,multiply,2}...is this just a weird artifact and really we spent 47+21=~68% of the time in the multiply function?
+
+#### Summary
+
+```text
+foldl (97%) 
+	|-> memoize (47%) 
+		|-> multiply (21%)
+```
+
+So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actually multiplying stuff.
+
+![alt text](./mult_kcachegrind.png "mult kcachegrind")
+
+
+### Solution #2 `multm`
+
+```
+%% Analysis results:
+%                                               CNT       ACC       OWN        
+[{ totals,                                     502404, 2256.319, 2250.620}].  %%%
+[{ "<0.8.0>",                                  502404,undefined, 2250.620}].   %%
+ { {memoize,multm,1},                             1, 2256.236,    0.014},     %
+ { {memoize,multm,2},                             1, 2256.222,    0.012},     %
+ { {memoize,memom,2},                             1, 2129.220,    0.018},     %
+ { {memoize,memo,2},                            101, 2129.153,    0.933},     %
+ { {memoize,add_root,2},                        100, 2127.995,    1.458},     %
+ { {memoize,add_child_by_key,3},               5050, 2113.871,   54.237},     %
+ { {memoize,add_child,3},                      4950, 2103.974,   82.351},     %
+ { {dict,on_bucket,3},                         14950,  849.495,  199.245},     %
+ { {dict,update,3},                            9900,  746.221,   75.396},     %
+ { {dict,fetch,2},                             15516,  635.038,  157.925},     %
+ { {dict,store,3},                             5050,  514.447,   43.860},     %
+ { {dict,'-update/3-fun-0-',3},                9900,  390.438,   30.851},     %
+ { {dict,update_bkt,3},                        60195,  359.535,  281.656},     %
+ { {memoize,child,3},                          4950,  289.191,   52.689},     %
+ { {dict,fetch_val,2},                         90293,  265.131,  264.474},     %
+ { {dict,get_slot,2},                          31698,  254.713,  158.826},     %
+ { {dict,maybe_expand,2},                      5050,  171.777,   15.760},     %
+ { {dict,maybe_expand_aux,2},                  5050,  155.938,   36.528},     %
+ { {dict,'-store/3-fun-0-',3},                 5050,  154.864,   15.857},     %
+ { {erlang,setelement,3},                      67938,  152.908,  152.908},     %
+ { {dict,store_bkt_val,3},                     31136,  138.991,  137.898},     %
+ { {memoize,'-multm/2-lc$^0/1-0-',2},           101,  124.996,    0.739},     %
+ { {memoize,fetch,2},                          1232,  124.257,   13.775},     %
+ { {erlang,phash,2},                           39085,  116.396,  116.396},     %
+ { {dict,get_bucket,2},                        16748,   93.026,   52.850},     %
+ { {dict,rehash,4},                            8381,   80.338,   57.430},     %
+ { {dict,is_key,2},                            1232,   46.276,   11.190},     %
+ { {dict,get_bucket_s,2},                      17742,   42.177,   42.034},     %
+ { {lists,split,2},                             566,   38.247,    3.039},     %
+ { {memoize,'-add_child/3-fun-0-',2},          4950,   36.829,   24.861},     %
+ { {memoize,'-add_child/3-fun-1-',2},          4950,   35.869,   24.305},     %
+ { {lists,split,3},                            9791,   35.208,   33.288},     %
+ { {memoize,'-multm/1-fun-0-',2},              5516,   32.176,   17.070},     %
+ { {dict,put_bucket_s,3},                      1988,   25.188,   15.629},     %
+ { {dict,find_key,2},                          5380,   17.594,   17.557},     %
+ { {memoize,multiply,2},                       5516,   15.036,   14.703},     %
+```
+
+#### Summary
+
+* Dictionary operations are taking up a *lot* of time
+* Because it's a silly algorithm, every time we add a node, we update two other nodes leading to dict:updates taking 37% of the time and dict:store taking 22%.
+
+![alt text](./multm_kcachegrind.png "multm kcachegrind")
+
+### Solution #3 `multz`
+
+```erlang
+%% Analysis results:
+%                                               CNT       ACC       OWN        
+[{ totals,                                     56872,  229.492,  229.021}].  %%%
+%                                               CNT       ACC       OWN        
+[{ "<0.8.0>",                                  56872,undefined,  229.021}].   %%
+ { {memoize,multz,1},                             1,  229.419,    0.010},     %
+ { {memoize,multz,2},                             1,  229.409,    0.027},     %
+ { {lists,foldl,3},                             101,  220.677,    0.600},     %
+ { {memoize,'-multz/2-fun-0-',3},               100,  220.077,    0.490},     %
+ { {memoize,fetchz,3},                         1624,  219.562,   21.149},     %
+ { {dict,store,3},                             1088,   92.174,    9.022},     %
+ { {dict,on_bucket,3},                         1088,   47.213,   13.847},     %
+ { {dict,is_key,2},                            1298,   45.656,   10.534},     %
+ { {lists,split,2},                             762,   37.168,    3.599},     %
+ { {lists,split,3},                            10611,   33.569,   31.583},     %
+ { {dict,maybe_expand,2},                      1088,   27.889,    3.229},     %
+ { {dict,'-store/3-fun-0-',3},                 1088,   25.760,    3.326},     %
+ { {dict,maybe_expand_aux,2},                  1088,   24.660,    6.887},     %
+ { {dict,get_slot,2},                          3022,   22.447,   14.425},     %
+ { {dict,store_bkt_val,3},                     5423,   22.422,   22.392},     %
+ { {dict,fetch,2},                              636,   20.990,    6.053},     %
+ { {dict,find_key,2},                          6578,   18.476,   18.476},     %
+ { {dict,rehash,4},                            1268,   11.268,    8.389},     %
+ { {erlang,phash,2},                           4133,   10.641,   10.641},     %
+ { {erlang,setelement,3},                      4827,   10.615,   10.615},     %
+ { {dict,get_bucket,2},                        1934,   10.079,    5.723},     %
+ { {dict,fetch_val,2},                         2445,    6.967,    6.944},     %
+ { {dict,get_bucket_s,2},                      2091,    4.691,    4.691},     %
+ { {memoize,'-multz/2-lc$^1/1-1-',2},           101,    4.208,    0.707},     %
+ { {memoize,'-multz/1-fun-0-',2},               762,    4.204,    2.306},     %
+ { {memoize,replacements,1},                      2,    4.039,    0.015},     %
+ { {dict,put_bucket_s,3},                       314,    3.745,    2.347},     %
+ { {memoize,'-replacements/1-lc$^0/1-0-',2},    202,    2.062,    1.458},     %
+ { {lists,filter,2},                              2,    1.962,    0.007},     %
+ { {lists,'-filter/2-lc$^0/1-0-',2},            202,    1.955,    1.384},     %
+ { {memoize,multiply,2},                        762,    1.898,    1.898},     %
+ { {erlang,'++',2},                             762,    1.705,    1.705},     %
+ { {lists,reverse,2},                           762,    1.684,    1.684},     %
+ ```
+
+#### Summary
+
+* Dictionary operations are taking up some of the time, about 40%
+* But we only call 'multiply' about 700 times
+
+![alt text](./multz_kcachegrind.png "multz kcachegrind")
+
+
+## Runtime Stats
