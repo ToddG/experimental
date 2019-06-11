@@ -203,7 +203,7 @@ foldl (97%)
 
 So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actually multiplying stuff.
 
-![alt text](./mult_kcachegrind.png "mult kcachegrind")
+![mult kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/mult_kcachegrind.png)
 
 
 ### Solution #2 `multm`
@@ -256,7 +256,7 @@ So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actual
 * Dictionary operations are taking up a *lot* of time
 * Because it's a silly algorithm, every time we add a node, we update two other nodes leading to dict:updates taking 37% of the time and dict:store taking 22%.
 
-![alt text](./multm_kcachegrind.png "multm kcachegrind")
+![multm kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multm_kcachegrind.png)
 
 ### Solution #3 `multz`
 
@@ -306,7 +306,7 @@ So yeah, we spend 97% of our time in foldl, and 47% of that time is spent actual
 * Dictionary operations are taking up some of the time, about 40%
 * But we only call 'multiply' about 700 times
 
-![alt text](./multz_kcachegrind.png "multz kcachegrind")
+![multz kcachegrind](https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/multz_kcachegrind.png)
 
 
 ## Runtime Stats
