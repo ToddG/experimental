@@ -310,3 +310,65 @@ foldl (97%)
 
 
 ## Runtime Stats
+
+So the crossover point where multz becomes faster than mult is somewhere around 1K items:
+```text
+|mult|len|10|time|0.000
+|multm|len|10|time|0.000
+|multz|len|10|time|0.001
+|mult|len|100|time|0.002
+|multm|len|100|time|0.048
+|multz|len|100|time|0.004
+|mult|len|1000|time|0.684
+|multm|len|1000|time|104.603
+|multz|len|1000|time|0.434
+```
+
+Here I've removed the multm compilations, and made the increments finer grained (2x instead of 10x), and you can see that the crossover point is still somewhere around 1K items:
+```text
+|mult|len|10|time|0.000
+|multz|len|10|time|0.000
+|mult|len|20|time|0.000
+|multz|len|20|time|0.001
+|mult|len|40|time|0.000
+|multz|len|40|time|0.001
+|mult|len|80|time|0.001
+|multz|len|80|time|0.005
+|mult|len|160|time|0.007
+|multz|len|160|time|0.012
+|mult|len|320|time|0.039
+|multz|len|320|time|0.062
+|mult|len|640|time|0.187
+|multz|len|640|time|0.282
+|mult|len|1280|time|1.332
+|multz|len|1280|time|1.247
+|mult|len|2560|time|10.234
+|multz|len|2560|time|5.827
+```
+
+## Final thoughts
+
+Erlang has some great tooling for profiling. 
+
+
+### Links
+
+#### Cover
+
+* https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/product/erlang/memoize/docs/memoize.html
+* http://erlang.org/doc/apps/tools/cover_chapter.html
+* https://www.rebar3.org/docs/configuration#section-cover
+
+#### Erlang Documentation
+* http://erlang.org/doc/man/fprof.html
+* http://erlang.org/doc/man/eprof.html (deprecated in favor of fprof)
+* http://erlang.org/doc/apps/tools/cprof_chapter.html
+* http://erlang.org/doc/man/cprof.html
+* http://erlang.org/doc/apps/eunit/chapter.html#Debugging_macros
+* http://erlang.org/doc/man/dict.html#is_key-2
+* http://erlang.org/doc/reference_manual/records.html
+
+#### Other Tools / Docs
+* https://kcachegrind.github.io/html/Download.html
+* http://blog.equanimity.nl/blog/2013/04/24/fprof-kcachegrind/
+* https://www.oreilly.com/library/view/erlang-and-otp/9781933988788/kindle_split_027.html

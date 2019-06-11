@@ -15,6 +15,7 @@ main(Args) ->
     io:format("Args: ~p~n", [Args]),
     prof_memo:cprof(),
     prof_memo:fprof(),
+    prof_memo:perf(),
     erlang:halt(0).
 
 mult([]) ->
