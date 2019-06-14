@@ -31,7 +31,7 @@ main(_) ->
 header() ->
     io_lib:format(<<"alg|input|items|utc|ts|duration">>, []).
 pheader() ->
-    io_lib:format(<<"procs|~s">>, [header()]).
+    io_lib:format(<<"procs|~s|func">>, [header()]).
 
 pbench(AlgName, InputName, F, L, Procs) ->
     S = bench(AlgName, InputName, F, L),
@@ -43,7 +43,7 @@ bench(AlgName, InputName, F, L) ->
     TS = format_utc_timestamp(),
     TS1 = erlang:system_time(microsecond),
     {Duration, Res} = ?timeit(F(L)),
-    S = io_lib:format(<<"~s|~s|~w|~s|~w|~.6f">>, [AlgName, InputName, InputSize, TS, TS1, Duration]),
+    S = io_lib:format(<<"~s|~s|~w|~s|~w|~.6f|base">>, [AlgName, InputName, InputSize, TS, TS1, Duration]),
     %% sanity check that the sorting function actually worked
     ?assertEqual(lists:sort(L), Res, AlgName),
     S.
@@ -56,10 +56,14 @@ run_benchmarks(S) ->
 %    dump(File1, [header()]),
 %    [dump(File1, [bench(AName, GName, AFunc, Data)]) || {AName, AFunc} <- S#suite.algorithm, {GName, Data} <- D].
 
-    {ok, File2} = file:open("docs/perf/pperf_run.csv", [write]),
+
+    {ok, File2} = file:open("docs/perf/pperf1_run.csv", [write]),
     dump(File2, [pheader()]),
+
+    {ok, File3} = file:open("docs/perf/pperf1-parts.csv", [write]),
+    io_lib:format(File3, <<"procs|alg|input|items|utc|ts|duration|func">>, []),
     PF = fun (Procs) -> 
-                 [dump(File2, [pbench(AName, GName, fun(L) ->  parallelized_sort(AName, AFunc, L, Procs) end, Data, Procs)] ) || 
+                 [dump(File2, [pbench(AName, GName, fun(L) ->  parallelized_sort(AName, GName, AFunc, L, Procs, File3) end, Data, Procs)] ) || 
                   {AName, AFunc} <- S#suite.algorithm, {GName, Data} <- D] end,
     [PF(Procs) || Procs <- lists:seq(erlang:system_info(logical_processors_available), 3, -1)].
 
@@ -179,8 +183,19 @@ bucketsort([H|T], D, HashFunc) ->
 %%--------------------------------------------------------------------
 %% Parallelized Sorting Algorithms
 %%--------------------------------------------------------------------
-parallelized_sort(FName, F, L, Procs) -> 
-    F(lists:flatten(rpc:pmap({?MODULE, list_to_atom(FName)}, [], fragment(L, Procs)))).
+parallelized_sort(FName, GName, F, L, Procs, File) ->
+    DataLen = length(L),
+    Log = fun(N,T) ->
+        io_lib:format(File, <<"~w|~s|~s|~w|~s|~w|~.6f|~s">>, [Procs, FName, GName, DataLen, format_utc_timestamp(), erlang:system_time(microsecond), T, N]) end,
+    {FragTime, Frags} = ?timeit(fragment(L, Procs)),
+    Log(frag, FragTime),
+    {RPCTime, RPCRes} = ?timeit(rpc:pmap({?MODULE, list_to_atom(FName)}, [], Frags)),
+    Log(rpcpmap, RPCTime),
+    {FlattenTime, Flattened} = lists:flatten(RPCRes),
+    Log(flattened, FlattenTime),
+    {FinalSortTime, Sorted} = F(Flattened),
+    Log(finalsort, FinalSortTime),
+    Sorted.
 
 fragment(L, Count) ->
     FragLen = length(L) div Count,
@@ -256,11 +271,12 @@ suite() ->
                 {"interleaved",   fun interleaved/1},
                 {"bucketed",      fun bucketed/1}],
      size=[
-%           {10}
-           {10},
-           {100}, 
-           {1000},
-           {10000},
-           {100000}
+%           {10},
+%           {100}, 
+%           {1000},
+%           {10000},
+%           {100000}
+           {10}
+%           {100000}
           ]
       }.
