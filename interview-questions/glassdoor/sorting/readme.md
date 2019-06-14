@@ -1,56 +1,22 @@
 # Sorting
 
-## Problem
+## Problem PART 1
+
+* https://www.glassdoor.com/Interview/software-engineer-interview-questions-SRCH_KO0,17.htm
 
 ```text
 Q: What sort would you use if you required tight max time bounds and wanted highly regular performance.
 ```
 
-There were some answers...
+See the battle of the sorting algorithms, fought in slow-motion on the Erlang BEAM:
 
-```text
-6 Answers
-
-    Vector sort.
-
-    Guaranteed to be O(n log n) performance. No better, no worse.
-
-    That is so say, a "Balanced Tree Sort" is guaranteed to be O(n log n) always.
-```
-
-## Discussion
-
-I don't find the answers to be particularly enlightening, so I'm going to generate some inputs and run some sorting algorithms through their paces:
-
-### Inputs
-
-* Constant value :      [1,1,1,...]
-* Pre-sorted :          [1,2,3,...]
-* Reverse sorted:       [N, N-1, N-2, ...]
-* Random:               [...]
-* Interleaved :         [Constant, Pre-sorted, Reverse-sorted, Random, ...]
+* https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/sorting/readme1.md
 
 
-### Algorithms
+## Problem PART 2
 
-* Insertion Sort
-* Quicksort
-* Selection Sort
-* Heap Sort
-* Counting Sort
-* Bucket Sort
-* Self Balancing Binary Search Tree
+Can we use the algorithms from PART 1 to analyse how Erlang/BEAM performs when distributing `embarrassingly parallel` problems? I think so.
 
+This is WIP...
 
-## Framework
-
-* Basic tests to verify algorithm correctness : [eunit, proper]
-* Perf tests that will run against each algorithm, in series
-* Measure:
-    * total wall clock time
-    * counts of the inner comparator function
-
-
-## Links
-
-* https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree
+* https://github.com/ToddG/experimental/blob/master/interview-questions/glassdoor/sorting/readme2.md
