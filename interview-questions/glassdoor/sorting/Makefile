@@ -1,8 +1,8 @@
 .PHONY: all
 all: jup
 
-.PHONY: erlang
-erlang:
+.PHONY: runtest
+runtest:
 	cd erlang/sortz && rebar3 do escriptize, eunit, proper
 	cd erlang/sortz && _build/default/bin/sortz
 
