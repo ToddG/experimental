@@ -49,19 +49,19 @@ bench(AlgName, InputName, F, L) ->
     S.
 
 run_benchmarks(S) ->
-    {ok, File1} = file:open("docs/perf/perf_run.csv", [write]),
     S = suite(),
     D = [{GName, GFunc(Size)} || {GName, GFunc} <- S#suite.generator, 
                                  {Size} <- S#suite.size],
-    dump(File1, [header()]),
-    [dump(File1, [bench(AName, GName, AFunc, Data)]) || {AName, AFunc} <- S#suite.algorithm, {GName, Data} <- D].
+%    {ok, File1} = file:open("docs/perf/perf_run.csv", [write]),
+%    dump(File1, [header()]),
+%    [dump(File1, [bench(AName, GName, AFunc, Data)]) || {AName, AFunc} <- S#suite.algorithm, {GName, Data} <- D].
 
-%    {ok, File2} = file:open("docs/perf/pperf_run.csv", [write]),
-%    dump(File2, [pheader()]),
-%    PF = fun (Procs) -> [dump(
-%                           File2, 
-%                           [pbench(AName, GName, fun(L) ->  parallelized_sort(AName, L, Procs) end, Data, Procs)]) || {AName, _} <- S#suite.algorithm, {GName, Data} <- D]) end,
-%    [PF(Procs) || Procs <- lists:seq(1, erlang:system_info(logical_processors_available))].
+    {ok, File2} = file:open("docs/perf/pperf_run.csv", [write]),
+    dump(File2, [pheader()]),
+    PF = fun (Procs) -> 
+                 [dump(File2, [pbench(AName, GName, fun(L) ->  parallelized_sort(AName, AFunc, L, Procs) end, Data, Procs)] ) || 
+                  {AName, AFunc} <- S#suite.algorithm, {GName, Data} <- D] end,
+    [PF(Procs) || Procs <- lists:seq(erlang:system_info(logical_processors_available), 3, -1)].
 
 
 dump(F, R) ->
@@ -179,8 +179,8 @@ bucketsort([H|T], D, HashFunc) ->
 %%--------------------------------------------------------------------
 %% Parallelized Sorting Algorithms
 %%--------------------------------------------------------------------
-parallelized_sort(FName, L, Procs) -> 
-    heapsort(lists:flatten(rpc:pmap({?MODULE, list_to_atom(FName)}, [], fragment(L, Procs)))).
+parallelized_sort(FName, F, L, Procs) -> 
+    F(lists:flatten(rpc:pmap({?MODULE, list_to_atom(FName)}, [], fragment(L, Procs)))).
 
 fragment(L, Count) ->
     FragLen = length(L) div Count,
@@ -256,6 +256,7 @@ suite() ->
                 {"interleaved",   fun interleaved/1},
                 {"bucketed",      fun bucketed/1}],
      size=[
+%           {10}
            {10},
            {100}, 
            {1000},
