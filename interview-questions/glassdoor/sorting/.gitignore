@@ -1,2 +1,3 @@
 *.csv
-.ipynb_checkpoints/*
+.ipynb_checkpoints/
+erlang/psortz/docs/.ipynb_checkpoints/
