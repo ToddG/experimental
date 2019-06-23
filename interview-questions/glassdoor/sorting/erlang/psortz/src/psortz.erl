@@ -60,11 +60,11 @@ benchmark_01(S, D) ->
     %%  NOTE: so this boils down to ```F(pmap(F))```
     %%  I think we'll see that the outer F swamps the inner F.
     {ok, File} = file:open("docs/perf/pperf-01.csv", [write, append]),
-%    dump(File, [pheader()]),
+    dump(File, [pheader()]),
     PF = fun (Procs) -> 
                  [dump(File, [pbench(AName, GName, fun(L) ->  parallelized_sort(AName, GName, AFunc, L, Procs, File) end, Data, Procs)]) || 
                   {AName, AFunc} <- S#suite.algorithm, {GName, Data} <- D] end,
-    [PF(Procs) || Procs <- [3,2,1]].
+    [PF(Procs) || Procs <- procs()].
 
 benchmark_02(S, D) ->
     %% benchmark sorting where:
@@ -77,12 +77,16 @@ benchmark_02(S, D) ->
     %%  I think we'll better the true performance of the inner F
     %%  and the benefits of pmap in this benchmark.
     {ok, File} = file:open("docs/perf/pperf-02.csv", [write,append]),
-%    dump(File, [pheader()]),
+    dump(File, [pheader()]),
     PF = fun (Procs) -> 
                  [dump(File, [pbench(AName, GName, fun(L) ->  parallelized_sort(AName, GName, L, Procs, File) end, Data, Procs)] ) || 
                   {AName, _} <- S#suite.algorithm, {GName, Data} <- D] end,
-    [PF(Procs) || Procs <- [3,2,1]].
+    [PF(Procs) || Procs <- procs()].
 
+procs() ->
+    % replace this line to hardcode the number of procs like so
+    % [3,2,1].
+    lists:seq(1, max(1, min(7, erlang:system_info(logical_processors_available)))).
 
 dump(F, R) ->
     [io:format("~s~n",[I]) || I <- R ],
