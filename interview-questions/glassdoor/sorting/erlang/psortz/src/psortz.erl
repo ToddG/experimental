@@ -86,7 +86,7 @@ benchmark_02(S, D) ->
 procs() ->
     % replace this line to hardcode the number of procs like so
     % [3,2,1].
-    lists:seq(1, max(1, min(7, erlang:system_info(logical_processors_available)))).
+    lists:seq(max(1, min(8, erlang:system_info(logical_processors_available))), 1, -1).
 
 dump(F, R) ->
     [io:format("~s~n",[I]) || I <- R ],
