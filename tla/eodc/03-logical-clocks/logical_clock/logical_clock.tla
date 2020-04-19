@@ -61,40 +61,16 @@ macro debug(name) begin
     end if;
 end macro;
 
+macro increment(proc) begin
+    if clocks[proc] < MaxValue then
+        clocks[proc] := clocks[proc] + 1; 
+        clocks_history[proc] := Append(clocks_history[proc], clocks[proc]);
+    end if;
+end macro;
 
 \* ---------------------------------------------------------------------------
 \* procedures can be called by processes (and can call macros)
 \* ---------------------------------------------------------------------------
-\*  do_increment
-\* 
-\*     Increment the process local variable 'x' _and_ increment the global value
-\*     for this proc stored in 'clocks[proc_id]'.
-\* 
-\*     Arguments:
-\*         x (int) : process local variable
-\*         proc (id) : process id
-procedure do_increment(proc)
-    \* procedures can have local vars, this var is not used
-    variables
-        x;
-    begin
-        DoIncrement1:
-        debug("DoIncrement Before");
-        x := clocks[proc];
-        if x < MaxValue then
-            DoIncrement2:
-            x := x + 1;
-            clocks[proc] := x;
-            clocks_history[proc] := Append(clocks_history[proc], x);
-        end if;
-        DoIncrement3:
-        debug("DoIncrement After");
-        DoIncrement4:
-        return;
-end procedure;
-
-
-
 \* \* do_send
 \* \*
 \* \*  Send a message to a target process.
@@ -134,23 +110,45 @@ end procedure;
 \*     end if; 
 \*     debug("DoReceive After");
 \* end procedure;
+
+\*  do_increment
 \* 
-\* \* do_internal
-\* \*
-\* \*  Some sort of internal event happened that caused the clock of this
-\* \*  process to increment.
-\* \*
-\* \*  Arguments:
-\* \*      internal_proc_id (id)            : process id
-\* procedure do_internal(i_internal_proc_id)
-\* begin
-\*     DoInternal1:
-\*     debug("DoInternal Before");
-\*     DoInternal2:
-\*     call do_increment(i_internal_proc_id);
-\*     DoInternal3:
-\*     debug("DoInternal After");
-\* end procedure;
+\*  Increment the clock value for this proc id, and add the current value
+\*  to the clocks_history for this proc id.
+\* 
+\*     Arguments:
+\*         proc (id) : process id
+procedure do_increment(proc)
+begin
+    DoIncrement1:
+    debug("DoIncrement Before");
+    if clocks[proc] < MaxValue then
+        DoIncrement2:
+        increment(proc);
+    end if;
+    DoIncrement3:
+    debug("DoIncrement After");
+    return;
+end procedure;
+
+\* 
+\* do_internal
+\*
+\*  Some sort of internal event happened that caused the clock of this
+\*  process to increment.
+\*
+\*  Arguments:
+\*      internal_proc_id (id)            : process id
+procedure do_internal(proc)
+begin
+    DoIncrement1:
+    debug("DoIncrement Before");
+    DoIncrement2:
+    increment(proc);
+    DoIncrement3:
+    debug("DoIncrement After");
+    return;
+end procedure;
 
 \* ---------------------------------------------------------------------------
 \* processes
@@ -170,8 +168,13 @@ process Worker \in Procs
 \*                 ProcReceive:
 \*                 call do_receive(self);
 \*             or
-        CallDoIncremeent:
-        call do_increment(self);
+            either
+                CallDoInternal:
+                call do_internal(self);
+            or
+                CallDoIncrement:
+                call do_increment(self);
+            end either;
         end while;
 end process;
 end algorithm;
@@ -180,6 +183,10 @@ end algorithm;
 \* PLUSCAL END
 \* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \* BEGIN TRANSLATION
+\* Label DoIncrement1 of procedure do_increment at line 54 col 5 changed to DoIncrement1_
+\* Label DoIncrement2 of procedure do_increment at line 65 col 5 changed to DoIncrement2_
+\* Label DoIncrement3 of procedure do_increment at line 54 col 5 changed to DoIncrement3_
+\* Parameter proc of procedure do_increment at line 121 col 24 changed to proc_
 CONSTANT defaultInitValue
 VARIABLES inbox, clocks, clocks_history, pc, stack
 
@@ -192,9 +199,9 @@ Invariants ==
     /\ ProcValuesNeverExceedMaxValue
     /\ MaxValueIsAlwaysGreatest
 
-VARIABLES proc, x
+VARIABLES proc_, proc
 
-vars == << inbox, clocks, clocks_history, pc, stack, proc, x >>
+vars == << inbox, clocks, clocks_history, pc, stack, proc_, proc >>
 
 ProcSet == (Procs)
 
@@ -203,10 +210,52 @@ Init == (* Global variables *)
         /\ clocks = [p \in Procs |-> 0]
         /\ clocks_history = [p \in Procs |-> <<>>]
         (* Procedure do_increment *)
+        /\ proc_ = [ self \in ProcSet |-> defaultInitValue]
+        (* Procedure do_internal *)
         /\ proc = [ self \in ProcSet |-> defaultInitValue]
-        /\ x = [ self \in ProcSet |-> defaultInitValue]
         /\ stack = [self \in ProcSet |-> << >>]
         /\ pc = [self \in ProcSet |-> "LogicalClockWorkflow"]
+
+DoIncrement1_(self) == /\ pc[self] = "DoIncrement1_"
+                       /\ IF Debug
+                             THEN /\ PrintT(("----"))
+                                  /\ PrintT(("Name: " \o ToString("DoIncrement Before")))
+                                  /\ PrintT(("Self: " \o ToString(self)))
+                                  /\ PrintT(("Procs: " \o ToString(Procs)))
+                                  /\ PrintT(("clocks: " \o ToString(clocks)))
+                                  /\ PrintT(("clocks_history: " \o ToString(clocks_history)))
+                             ELSE /\ TRUE
+                       /\ IF clocks[proc_[self]] < MaxValue
+                             THEN /\ pc' = [pc EXCEPT ![self] = "DoIncrement2_"]
+                             ELSE /\ pc' = [pc EXCEPT ![self] = "DoIncrement3_"]
+                       /\ UNCHANGED << inbox, clocks, clocks_history, stack, 
+                                       proc_, proc >>
+
+DoIncrement2_(self) == /\ pc[self] = "DoIncrement2_"
+                       /\ IF clocks[proc_[self]] < MaxValue
+                             THEN /\ clocks' = [clocks EXCEPT ![proc_[self]] = clocks[proc_[self]] + 1]
+                                  /\ clocks_history' = [clocks_history EXCEPT ![proc_[self]] = Append(clocks_history[proc_[self]], clocks'[proc_[self]])]
+                             ELSE /\ TRUE
+                                  /\ UNCHANGED << clocks, clocks_history >>
+                       /\ pc' = [pc EXCEPT ![self] = "DoIncrement3_"]
+                       /\ UNCHANGED << inbox, stack, proc_, proc >>
+
+DoIncrement3_(self) == /\ pc[self] = "DoIncrement3_"
+                       /\ IF Debug
+                             THEN /\ PrintT(("----"))
+                                  /\ PrintT(("Name: " \o ToString("DoIncrement After")))
+                                  /\ PrintT(("Self: " \o ToString(self)))
+                                  /\ PrintT(("Procs: " \o ToString(Procs)))
+                                  /\ PrintT(("clocks: " \o ToString(clocks)))
+                                  /\ PrintT(("clocks_history: " \o ToString(clocks_history)))
+                             ELSE /\ TRUE
+                       /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
+                       /\ proc_' = [proc_ EXCEPT ![self] = Head(stack[self]).proc_]
+                       /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
+                       /\ UNCHANGED << inbox, clocks, clocks_history, proc >>
+
+do_increment(self) == DoIncrement1_(self) \/ DoIncrement2_(self)
+                         \/ DoIncrement3_(self)
 
 DoIncrement1(self) == /\ pc[self] = "DoIncrement1"
                       /\ IF Debug
@@ -217,19 +266,18 @@ DoIncrement1(self) == /\ pc[self] = "DoIncrement1"
                                  /\ PrintT(("clocks: " \o ToString(clocks)))
                                  /\ PrintT(("clocks_history: " \o ToString(clocks_history)))
                             ELSE /\ TRUE
-                      /\ x' = [x EXCEPT ![self] = clocks[proc[self]]]
-                      /\ IF x'[self] < MaxValue
-                            THEN /\ pc' = [pc EXCEPT ![self] = "DoIncrement2"]
-                            ELSE /\ pc' = [pc EXCEPT ![self] = "DoIncrement3"]
+                      /\ pc' = [pc EXCEPT ![self] = "DoIncrement2"]
                       /\ UNCHANGED << inbox, clocks, clocks_history, stack, 
-                                      proc >>
+                                      proc_, proc >>
 
 DoIncrement2(self) == /\ pc[self] = "DoIncrement2"
-                      /\ x' = [x EXCEPT ![self] = x[self] + 1]
-                      /\ clocks' = [clocks EXCEPT ![proc[self]] = x'[self]]
-                      /\ clocks_history' = [clocks_history EXCEPT ![proc[self]] = Append(clocks_history[proc[self]], x'[self])]
+                      /\ IF clocks[proc[self]] < MaxValue
+                            THEN /\ clocks' = [clocks EXCEPT ![proc[self]] = clocks[proc[self]] + 1]
+                                 /\ clocks_history' = [clocks_history EXCEPT ![proc[self]] = Append(clocks_history[proc[self]], clocks'[proc[self]])]
+                            ELSE /\ TRUE
+                                 /\ UNCHANGED << clocks, clocks_history >>
                       /\ pc' = [pc EXCEPT ![self] = "DoIncrement3"]
-                      /\ UNCHANGED << inbox, stack, proc >>
+                      /\ UNCHANGED << inbox, stack, proc_, proc >>
 
 DoIncrement3(self) == /\ pc[self] = "DoIncrement3"
                       /\ IF Debug
@@ -240,39 +288,42 @@ DoIncrement3(self) == /\ pc[self] = "DoIncrement3"
                                  /\ PrintT(("clocks: " \o ToString(clocks)))
                                  /\ PrintT(("clocks_history: " \o ToString(clocks_history)))
                             ELSE /\ TRUE
-                      /\ pc' = [pc EXCEPT ![self] = "DoIncrement4"]
-                      /\ UNCHANGED << inbox, clocks, clocks_history, stack, 
-                                      proc, x >>
-
-DoIncrement4(self) == /\ pc[self] = "DoIncrement4"
                       /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
-                      /\ x' = [x EXCEPT ![self] = Head(stack[self]).x]
                       /\ proc' = [proc EXCEPT ![self] = Head(stack[self]).proc]
                       /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
-                      /\ UNCHANGED << inbox, clocks, clocks_history >>
+                      /\ UNCHANGED << inbox, clocks, clocks_history, proc_ >>
 
-do_increment(self) == DoIncrement1(self) \/ DoIncrement2(self)
-                         \/ DoIncrement3(self) \/ DoIncrement4(self)
+do_internal(self) == DoIncrement1(self) \/ DoIncrement2(self)
+                        \/ DoIncrement3(self)
 
 LogicalClockWorkflow(self) == /\ pc[self] = "LogicalClockWorkflow"
-                              /\ pc' = [pc EXCEPT ![self] = "CallDoIncremeent"]
+                              /\ \/ /\ pc' = [pc EXCEPT ![self] = "CallDoInternal"]
+                                 \/ /\ pc' = [pc EXCEPT ![self] = "CallDoIncrement"]
                               /\ UNCHANGED << inbox, clocks, clocks_history, 
-                                              stack, proc, x >>
+                                              stack, proc_, proc >>
 
-CallDoIncremeent(self) == /\ pc[self] = "CallDoIncremeent"
-                          /\ /\ proc' = [proc EXCEPT ![self] = self]
-                             /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_increment",
-                                                                      pc        |->  "LogicalClockWorkflow",
-                                                                      x         |->  x[self],
-                                                                      proc      |->  proc[self] ] >>
-                                                                  \o stack[self]]
-                          /\ x' = [x EXCEPT ![self] = defaultInitValue]
-                          /\ pc' = [pc EXCEPT ![self] = "DoIncrement1"]
-                          /\ UNCHANGED << inbox, clocks, clocks_history >>
+CallDoInternal(self) == /\ pc[self] = "CallDoInternal"
+                        /\ /\ proc' = [proc EXCEPT ![self] = self]
+                           /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_internal",
+                                                                    pc        |->  "LogicalClockWorkflow",
+                                                                    proc      |->  proc[self] ] >>
+                                                                \o stack[self]]
+                        /\ pc' = [pc EXCEPT ![self] = "DoIncrement1"]
+                        /\ UNCHANGED << inbox, clocks, clocks_history, proc_ >>
 
-Worker(self) == LogicalClockWorkflow(self) \/ CallDoIncremeent(self)
+CallDoIncrement(self) == /\ pc[self] = "CallDoIncrement"
+                         /\ /\ proc_' = [proc_ EXCEPT ![self] = self]
+                            /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_increment",
+                                                                     pc        |->  "LogicalClockWorkflow",
+                                                                     proc_     |->  proc_[self] ] >>
+                                                                 \o stack[self]]
+                         /\ pc' = [pc EXCEPT ![self] = "DoIncrement1_"]
+                         /\ UNCHANGED << inbox, clocks, clocks_history, proc >>
 
-Next == (\E self \in ProcSet: do_increment(self))
+Worker(self) == LogicalClockWorkflow(self) \/ CallDoInternal(self)
+                   \/ CallDoIncrement(self)
+
+Next == (\E self \in ProcSet: do_increment(self) \/ do_internal(self))
            \/ (\E self \in Procs: Worker(self))
 
 Spec == Init /\ [][Next]_vars
