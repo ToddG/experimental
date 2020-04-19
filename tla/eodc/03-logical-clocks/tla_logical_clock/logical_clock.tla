@@ -52,18 +52,20 @@ TypeInvariant ==
 
 WorkerStart(self) ==
     /\ pc[self] = "START"
-    /\ \E s \in states : pc' = [pc EXCEPT ![self] = s]
+    /\ \E s \in ((states) \ {"START"}) : pc' = [pc EXCEPT ![self] = s]
     /\ UNCHANGED clock_vars
 
 WorkerSend(self) ==
     LET 
         other_clocks == {x \in Proc : x # self}
+        ts == JavaTime
     IN  /\ pc[self] = "SEND"
-        /\ clock' = [clock EXCEPT ![self] = clock[self] + 1]
-        /\ clock_history'= [clock_history EXCEPT ![self] = Append(@, clock'[self])]
         /\ \E target \in other_clocks : 
-                inbox' = [inbox EXCEPT ![target] = Append(@, clock'[self])]
-        /\ pc' = [pc EXCEPT ![self] = "START"]
+                /\ clock' = [clock EXCEPT ![self] = clock[self] + 1]
+                /\ clock_history'= [clock_history EXCEPT ![self] = Append(@, clock'[self])]
+                /\ inbox' = [inbox EXCEPT ![target] = Append(@, clock'[self])]
+                /\ PrintT("TS: " \o ToString(ts) \o " Proc: " \o ToString(self) \o " Sending: " \o ToString(clock'[self]) \o " To: " \o ToString(target))
+        /\ pc' = [pc EXCEPT ![self] = "PROBE"]
         /\ UNCHANGED <<states>>
     
 WorkerReceive(self) ==
@@ -72,14 +74,16 @@ WorkerReceive(self) ==
         T == IF inbox[self] = <<>> THEN Null ELSE Tail(inbox[self])
     IN  /\ pc[self] = "RCV"
         /\ IF H # Null
-            THEN /\ PrintT("H: " \o ToString(H))
-                 /\ clock' = [clock EXCEPT ![self] = PT!Max(clock[self], H) + 1]
-                 /\ clock_history' = [clock_history EXCEPT ![self] = Append(@, clock'[self])]
-                 /\ inbox' = [inbox EXCEPT ![self] = T]
-                 /\ UNCHANGED <<states>>
-            ELSE /\ TRUE
-                 /\ UNCHANGED clock_vars
-        /\ pc' = [pc EXCEPT ![self] = "START"]
+            THEN
+                /\ PrintT("Proc: " \o ToString(self) \o " Reading: " \o ToString(H))
+                /\ clock' = [clock EXCEPT ![self] = PT!Max(clock[self], H) + 1]
+                /\ clock_history' = [clock_history EXCEPT ![self] = Append(@, clock'[self])]
+                /\ inbox' = [inbox EXCEPT ![self] = T]
+                /\ UNCHANGED <<states>>
+            ELSE 
+                /\ TRUE
+                /\ UNCHANGED clock_vars
+        /\ pc' = [pc EXCEPT ![self] = "PROBE"]
 
 WorkerInternal(self) ==
     /\ pc[self] = "INT"
@@ -90,10 +94,10 @@ WorkerInternal(self) ==
 
 WorkerStop(self) ==
     /\ pc[self] = "STOP"
-    /\ pc' = [pc EXCEPT ![self] = "START"]
-    /\ UNCHANGED clock_vars
+    /\ UNCHANGED all_vars
 
 Probe(self) ==
+    /\ pc[self] = "PROBE"
     /\ IF Debug 
         THEN 
             /\ PrintT(("----"))
@@ -104,7 +108,8 @@ Probe(self) ==
             /\ PrintT(("inbox: " \o ToString(inbox)))
         ELSE 
             /\ TRUE
-    /\ UNCHANGED all_vars
+    /\ pc' = [pc EXCEPT ![self] = "START"]
+    /\ UNCHANGED clock_vars
 
 Worker(self) == 
     \/ WorkerStart(self)
