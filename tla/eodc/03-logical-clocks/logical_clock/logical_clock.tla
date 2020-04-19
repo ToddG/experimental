@@ -1,12 +1,14 @@
 ------------------------------ MODULE logical_clock  ------------------------------
 EXTENDS TLC
+PT == INSTANCE PT
 LOCAL INSTANCE FiniteSets
 LOCAL INSTANCE Integers
 LOCAL INSTANCE Sequences
 LOCAL INSTANCE Naturals
 
-CONSTANT Procs                  \* set of processors
-ASSUME Cardinality(Procs) > 0   \* number of processors > 0
+CONSTANT Debug                  \* if true then print debug stuff
+ASSUME Debug \in {TRUE, FALSE}
+CONSTANT Procs          \* processors
 
 
 \* ---------------------------------------------------------------------------
@@ -26,6 +28,7 @@ ASSUME Cardinality(Procs) > 0   \* number of processors > 0
 variables
     \* initialize all the clocks to zero
     clocks  = [p \in Procs |-> 0],
+    ghost_clocks = [p \in Procs |-> <<>>],
     \* initialize the message inbox to empty lists
     inbox   = [p \in Procs |-> <<>>];
 
@@ -33,16 +36,38 @@ variables
 \* defines (INVARIANTS)
 \* ---------------------------------------------------------------------------
 \*define
+\*    ClocksAlwaysIncrease ==
+\*        \A p \in Procs :
+\*            if Len(ghost_clocks[p] > 1:
+\*                \A m,n : 1..
+\*    Invariants == ClocksAlwaysIncrease
 \*end define;
 
 
 \* ---------------------------------------------------------------------------
 \* macros can be called by procedures and processes
 \* ---------------------------------------------------------------------------
-macro add_message(receiver_process_id, sender_clock_value) begin
-    inbox[receiver_process_id] := inbox[receiver_process_id] \o sender_clock_value;
+macro debug(name) begin
+    if Debug then
+        print("----");
+        print("Name: " \o ToString(name));
+        print("Self: " \o ToString(self));
+        print("Procs: " \o ToString(Procs));
+        print("clocks: " \o ToString(clocks));
+        print("ghost_clocks: " \o ToString(ghost_clocks));
+        print("inbox: " \o ToString(inbox));
+    end if;
 end macro;
 
+macro increment_clock(increment_proc_id) begin
+    with c = clocks[increment_proc_id], g = ghost_clocks[increment_proc_id] do
+        \* increment the sender's clock
+        c = c + 1;
+        clocks[increment_proc_id] := c;
+        \* increment the sender's ghost vector clock
+        ghost_clocks[increment_proc_id] := Append(g, c)
+    end with;
+end macro;
 \* ---------------------------------------------------------------------------
 \* procedures can be called by processes (and can call macros)
 \* ---------------------------------------------------------------------------
@@ -51,13 +76,17 @@ end macro;
 \*  Send a message to a target process.
 \*
 \*  Arguments:
-\*      sender_proc_id (id)     : process id of the sender
-\*      receiver_proc_id (id)   : process id of the receiver
-procedure do_send(sender_proc_id, receiver_proc_id)
+\*      ds_sender_proc_id (id)     : process id of the sender
+\*      ds_receiver_proc_id (id)   : process id of the receiver
+procedure do_send(ds_sender_proc_id, ds_receiver_proc_id)
 begin
+    PreSend:
+    debug("DoSend Before");
+    \* simulate sending a message to the receiver by appending to the receiver's
+    \* inbox the sender's updated clock value
     DoSend:
-    clocks[sender_proc_id] := clocks[sender_proc_id] + 1;
-    add_message(receiver_proc_id, clocks[sender_proc_id]);
+    inbox[ds_receiver_proc_id] := Append(inbox[ds_receiver_proc_id], clocks[ds_sender_proc_id]);
+    debug("DoSend After");
 end procedure;
 
 \* do_receive
@@ -65,21 +94,21 @@ end procedure;
 \*  Pop messages off the inbox and update clock 
 \*
 \*  Arguments:
-\*      sender_proc_id (id)     : process id of the sender
 \*      receiver_proc_id (id)   : process id of the receiver
-procedure do_receive(receiver_proc_id)
+procedure do_receive(r_receiver_proc_id)
     variables
         H = <<>>,
         T = <<>>;
 begin
     DoReceive:
-    H := Head(inbox[receiver_proc_id]);
-    T := Tail(inbox[receiver_proc_id]);
-    if H # <<>>
-    then
-        clocks[receiver_proc_id] := max(clocks[receiver_proc_id], H) + 1;
-        inbox[receiver_proc_id] := T;
+    debug("DoReceive Before");
+    if inbox[r_receiver_proc_id] # <<>> then
+        H := Head(inbox[r_receiver_proc_id]);
+        T := Tail(inbox[r_receiver_proc_id]);
+        clocks[r_receiver_proc_id] := PT!Max(clocks[r_receiver_proc_id], H) + 1;
+        inbox[r_receiver_proc_id] := T;
     end if; 
+    debug("DoReceive After");
 end procedure;
 
 \* do_internal
@@ -88,29 +117,33 @@ end procedure;
 \*  process to increment.
 \*
 \*  Arguments:
-\*      proc_id (id)            : process id
-procedure do_internal(proc_id)
+\*      internal_proc_id (id)            : process id
+procedure do_internal(i_internal_proc_id)
 begin
     DoInternal:
-    clocks[proc_id] := clocks[proc_id] + 1;
+    debug("DoInternal Before");
+    clocks[i_internal_proc_id] := clocks[i_internal_proc_id] + 1;
+    debug("DoInternal After");
 end procedure;
 
 \* ---------------------------------------------------------------------------
 \* processes
 \* ---------------------------------------------------------------------------
-process Proc \in Procs
+process WorkerProcess \in Procs
     begin
         LogicalClockWorkflow:
         while TRUE do
             either
                 ProcSend:
-                call do_send(self, p \in Procs)
+                with p \in Procs \ {self} do
+                    call do_send(self, p);
+                end with;
             or
                 ProcReceive:
-                call do_receive(self)
+                call do_receive(self);
             or
                 ProcInternal:
-                call do_internal(self)
+                call do_internal(self);
             end either;
         end while;
 end process;
@@ -121,68 +154,181 @@ end algorithm;
 \* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \* BEGIN TRANSLATION
 CONSTANT defaultInitValue
-VARIABLES proc_values, pc, stack
+VARIABLES debug, clocks, ghost_clocks, inbox, pc, stack, ds_sender_proc_id, 
+          ds_receiver_proc_id, r_receiver_proc_id, H, T, i_internal_proc_id
 
-(* define statement *)
-ProcValuesNeverExceedMaxValue ==
-    \A p \in Procs : ~(proc_values[p] > MaxValue)
-
-VARIABLES x, proc, procedure_local_y_not_used, proc_local_var_a
-
-vars == << proc_values, pc, stack, x, proc, procedure_local_y_not_used, 
-           proc_local_var_a >>
+vars == << debug, clocks, ghost_clocks, inbox, pc, stack, ds_sender_proc_id, 
+           ds_receiver_proc_id, r_receiver_proc_id, H, T, i_internal_proc_id
+        >>
 
 ProcSet == (Procs)
 
 Init == (* Global variables *)
-        /\ proc_values = [p \in Procs |-> 0]
-        (* Procedure do_increment *)
-        /\ x = [ self \in ProcSet |-> defaultInitValue]
-        /\ proc = [ self \in ProcSet |-> defaultInitValue]
-        /\ procedure_local_y_not_used = [ self \in ProcSet |-> 0]
-        (* Process Proc *)
-        /\ proc_local_var_a = [self \in Procs |-> 0]
+        /\ debug = TRUE
+        /\ clocks = [p \in Procs |-> 0]
+        /\ ghost_clocks = [p \in Procs |-> <<>>]
+        /\ inbox = [p \in Procs |-> <<>>]
+        (* Procedure do_send *)
+        /\ ds_sender_proc_id = [ self \in ProcSet |-> defaultInitValue]
+        /\ ds_receiver_proc_id = [ self \in ProcSet |-> defaultInitValue]
+        (* Procedure do_receive *)
+        /\ r_receiver_proc_id = [ self \in ProcSet |-> defaultInitValue]
+        /\ H = [ self \in ProcSet |-> <<>>]
+        /\ T = [ self \in ProcSet |-> <<>>]
+        (* Procedure do_internal *)
+        /\ i_internal_proc_id = [ self \in ProcSet |-> defaultInitValue]
         /\ stack = [self \in ProcSet |-> << >>]
-        /\ pc = [self \in ProcSet |-> "ProcLabel1"]
+        /\ pc = [self \in ProcSet |-> "LogicalClockWorkflow"]
 
-ProcedureLabel1(self) == /\ pc[self] = "ProcedureLabel1"
-                         /\ IF x[self] < MaxValue
-                               THEN /\ x' = [x EXCEPT ![self] = x[self] + 1]
-                                    /\ proc_values' = [proc_values EXCEPT ![proc[self]] = x'[self]]
-                               ELSE /\ TRUE
-                                    /\ UNCHANGED << proc_values, x >>
-                         /\ pc' = [pc EXCEPT ![self] = "ProcedureLabel1"]
-                         /\ UNCHANGED << stack, proc, 
-                                         procedure_local_y_not_used, 
-                                         proc_local_var_a >>
+PreSend(self) == /\ pc[self] = "PreSend"
+                 /\ IF debug
+                       THEN /\ PrintT(("----"))
+                            /\ PrintT(("Name: " \o ToString("DoSend Before")))
+                            /\ PrintT(("Self: " \o ToString(self)))
+                            /\ PrintT(("Procs: " \o ToString(Procs)))
+                            /\ PrintT(("clocks: " \o ToString(clocks)))
+                            /\ PrintT(("ghost_clocks: " \o ToString(ghost_clocks)))
+                            /\ PrintT(("inbox: " \o ToString(inbox)))
+                       ELSE /\ TRUE
+                 /\ pc' = [pc EXCEPT ![self] = "DoSend"]
+                 /\ UNCHANGED << debug, clocks, ghost_clocks, inbox, stack, 
+                                 ds_sender_proc_id, ds_receiver_proc_id, 
+                                 r_receiver_proc_id, H, T, i_internal_proc_id >>
 
-ProcedureLabel2(self) == /\ pc[self] = "ProcedureLabel2"
-                         /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
-                         /\ procedure_local_y_not_used' = [procedure_local_y_not_used EXCEPT ![self] = Head(stack[self]).procedure_local_y_not_used]
-                         /\ x' = [x EXCEPT ![self] = Head(stack[self]).x]
-                         /\ proc' = [proc EXCEPT ![self] = Head(stack[self]).proc]
-                         /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
-                         /\ UNCHANGED << proc_values, proc_local_var_a >>
+DoSend(self) == /\ pc[self] = "DoSend"
+                /\ inbox' = [inbox EXCEPT ![ds_receiver_proc_id[self]] = Append(inbox[ds_receiver_proc_id[self]], clocks[ds_sender_proc_id[self]])]
+                /\ IF debug
+                      THEN /\ PrintT(("----"))
+                           /\ PrintT(("Name: " \o ToString("DoSend After")))
+                           /\ PrintT(("Self: " \o ToString(self)))
+                           /\ PrintT(("Procs: " \o ToString(Procs)))
+                           /\ PrintT(("clocks: " \o ToString(clocks)))
+                           /\ PrintT(("ghost_clocks: " \o ToString(ghost_clocks)))
+                           /\ PrintT(("inbox: " \o ToString(inbox')))
+                      ELSE /\ TRUE
+                /\ pc' = [pc EXCEPT ![self] = "Error"]
+                /\ UNCHANGED << debug, clocks, ghost_clocks, stack, 
+                                ds_sender_proc_id, ds_receiver_proc_id, 
+                                r_receiver_proc_id, H, T, i_internal_proc_id >>
 
-do_increment(self) == ProcedureLabel1(self) \/ ProcedureLabel2(self)
+do_send(self) == PreSend(self) \/ DoSend(self)
 
-ProcLabel1(self) == /\ pc[self] = "ProcLabel1"
-                    /\ /\ proc' = [proc EXCEPT ![self] = self]
-                       /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_increment",
-                                                                pc        |->  "ProcLabel1",
-                                                                procedure_local_y_not_used |->  procedure_local_y_not_used[self],
-                                                                x         |->  x[self],
-                                                                proc      |->  proc[self] ] >>
-                                                            \o stack[self]]
-                       /\ x' = [x EXCEPT ![self] = proc_local_var_a[self]]
-                    /\ procedure_local_y_not_used' = [procedure_local_y_not_used EXCEPT ![self] = 0]
-                    /\ pc' = [pc EXCEPT ![self] = "ProcedureLabel1"]
-                    /\ UNCHANGED << proc_values, proc_local_var_a >>
+DoReceive(self) == /\ pc[self] = "DoReceive"
+                   /\ IF debug
+                         THEN /\ PrintT(("----"))
+                              /\ PrintT(("Name: " \o ToString("DoReceive Before")))
+                              /\ PrintT(("Self: " \o ToString(self)))
+                              /\ PrintT(("Procs: " \o ToString(Procs)))
+                              /\ PrintT(("clocks: " \o ToString(clocks)))
+                              /\ PrintT(("ghost_clocks: " \o ToString(ghost_clocks)))
+                              /\ PrintT(("inbox: " \o ToString(inbox)))
+                         ELSE /\ TRUE
+                   /\ IF inbox[r_receiver_proc_id[self]] # <<>>
+                         THEN /\ H' = [H EXCEPT ![self] = Head(inbox[r_receiver_proc_id[self]])]
+                              /\ T' = [T EXCEPT ![self] = Tail(inbox[r_receiver_proc_id[self]])]
+                              /\ clocks' = [clocks EXCEPT ![r_receiver_proc_id[self]] = PT!Max(clocks[r_receiver_proc_id[self]], H'[self]) + 1]
+                              /\ inbox' = [inbox EXCEPT ![r_receiver_proc_id[self]] = T'[self]]
+                         ELSE /\ TRUE
+                              /\ UNCHANGED << clocks, inbox, H, T >>
+                   /\ IF debug
+                         THEN /\ PrintT(("----"))
+                              /\ PrintT(("Name: " \o ToString("DoReceive After")))
+                              /\ PrintT(("Self: " \o ToString(self)))
+                              /\ PrintT(("Procs: " \o ToString(Procs)))
+                              /\ PrintT(("clocks: " \o ToString(clocks')))
+                              /\ PrintT(("ghost_clocks: " \o ToString(ghost_clocks)))
+                              /\ PrintT(("inbox: " \o ToString(inbox')))
+                         ELSE /\ TRUE
+                   /\ pc' = [pc EXCEPT ![self] = "Error"]
+                   /\ UNCHANGED << debug, ghost_clocks, stack, 
+                                   ds_sender_proc_id, ds_receiver_proc_id, 
+                                   r_receiver_proc_id, i_internal_proc_id >>
 
-Proc(self) == ProcLabel1(self)
+do_receive(self) == DoReceive(self)
 
-Next == (\E self \in ProcSet: do_increment(self))
-           \/ (\E self \in Procs: Proc(self))
+DoInternal(self) == /\ pc[self] = "DoInternal"
+                    /\ IF debug
+                          THEN /\ PrintT(("----"))
+                               /\ PrintT(("Name: " \o ToString("DoInternal Before")))
+                               /\ PrintT(("Self: " \o ToString(self)))
+                               /\ PrintT(("Procs: " \o ToString(Procs)))
+                               /\ PrintT(("clocks: " \o ToString(clocks)))
+                               /\ PrintT(("ghost_clocks: " \o ToString(ghost_clocks)))
+                               /\ PrintT(("inbox: " \o ToString(inbox)))
+                          ELSE /\ TRUE
+                    /\ clocks' = [clocks EXCEPT ![i_internal_proc_id[self]] = clocks[i_internal_proc_id[self]] + 1]
+                    /\ IF debug
+                          THEN /\ PrintT(("----"))
+                               /\ PrintT(("Name: " \o ToString("DoInternal After")))
+                               /\ PrintT(("Self: " \o ToString(self)))
+                               /\ PrintT(("Procs: " \o ToString(Procs)))
+                               /\ PrintT(("clocks: " \o ToString(clocks')))
+                               /\ PrintT(("ghost_clocks: " \o ToString(ghost_clocks)))
+                               /\ PrintT(("inbox: " \o ToString(inbox)))
+                          ELSE /\ TRUE
+                    /\ pc' = [pc EXCEPT ![self] = "Error"]
+                    /\ UNCHANGED << debug, ghost_clocks, inbox, stack, 
+                                    ds_sender_proc_id, ds_receiver_proc_id, 
+                                    r_receiver_proc_id, H, T, 
+                                    i_internal_proc_id >>
+
+do_internal(self) == DoInternal(self)
+
+LogicalClockWorkflow(self) == /\ pc[self] = "LogicalClockWorkflow"
+                              /\ \/ /\ pc' = [pc EXCEPT ![self] = "ProcSend"]
+                                 \/ /\ pc' = [pc EXCEPT ![self] = "ProcReceive"]
+                                 \/ /\ pc' = [pc EXCEPT ![self] = "ProcInternal"]
+                              /\ UNCHANGED << debug, clocks, ghost_clocks, 
+                                              inbox, stack, ds_sender_proc_id, 
+                                              ds_receiver_proc_id, 
+                                              r_receiver_proc_id, H, T, 
+                                              i_internal_proc_id >>
+
+ProcSend(self) == /\ pc[self] = "ProcSend"
+                  /\ \E p \in Procs \ {self}:
+                       /\ /\ ds_receiver_proc_id' = [ds_receiver_proc_id EXCEPT ![self] = p]
+                          /\ ds_sender_proc_id' = [ds_sender_proc_id EXCEPT ![self] = self]
+                          /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_send",
+                                                                   pc        |->  "LogicalClockWorkflow",
+                                                                   ds_sender_proc_id |->  ds_sender_proc_id[self],
+                                                                   ds_receiver_proc_id |->  ds_receiver_proc_id[self] ] >>
+                                                               \o stack[self]]
+                       /\ pc' = [pc EXCEPT ![self] = "PreSend"]
+                  /\ UNCHANGED << debug, clocks, ghost_clocks, inbox, 
+                                  r_receiver_proc_id, H, T, i_internal_proc_id >>
+
+ProcReceive(self) == /\ pc[self] = "ProcReceive"
+                     /\ /\ r_receiver_proc_id' = [r_receiver_proc_id EXCEPT ![self] = self]
+                        /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_receive",
+                                                                 pc        |->  "LogicalClockWorkflow",
+                                                                 H         |->  H[self],
+                                                                 T         |->  T[self],
+                                                                 r_receiver_proc_id |->  r_receiver_proc_id[self] ] >>
+                                                             \o stack[self]]
+                     /\ H' = [H EXCEPT ![self] = <<>>]
+                     /\ T' = [T EXCEPT ![self] = <<>>]
+                     /\ pc' = [pc EXCEPT ![self] = "DoReceive"]
+                     /\ UNCHANGED << debug, clocks, ghost_clocks, inbox, 
+                                     ds_sender_proc_id, ds_receiver_proc_id, 
+                                     i_internal_proc_id >>
+
+ProcInternal(self) == /\ pc[self] = "ProcInternal"
+                      /\ /\ i_internal_proc_id' = [i_internal_proc_id EXCEPT ![self] = self]
+                         /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_internal",
+                                                                  pc        |->  "LogicalClockWorkflow",
+                                                                  i_internal_proc_id |->  i_internal_proc_id[self] ] >>
+                                                              \o stack[self]]
+                      /\ pc' = [pc EXCEPT ![self] = "DoInternal"]
+                      /\ UNCHANGED << debug, clocks, ghost_clocks, inbox, 
+                                      ds_sender_proc_id, ds_receiver_proc_id, 
+                                      r_receiver_proc_id, H, T >>
+
+WorkerProcess(self) == LogicalClockWorkflow(self) \/ ProcSend(self)
+                          \/ ProcReceive(self) \/ ProcInternal(self)
+
+Next == (\E self \in ProcSet:  \/ do_send(self) \/ do_receive(self)
+                               \/ do_internal(self))
+           \/ (\E self \in Procs: WorkerProcess(self))
 
 Spec == Init /\ [][Next]_vars
 
