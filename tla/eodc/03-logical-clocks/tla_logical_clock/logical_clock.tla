@@ -19,11 +19,12 @@ ASSUME Cardinality(Procs) > 0   \* we need at least one processor
 \* ---------------------------------------------------------------------------
 VARIABLES 
     inbox,                      \* each clock process has a msg inbox (queue)
-    clocks,                     \* each clock has it's current value 
-    clocks_history,             \* each clock has a history of value changes
+    clock,                      \* each clock has it's current value 
+    clock_history,              \* each clock has a history of value changes
     pc                          \* program counter
 
-vars == << inbox, clocks, clocks_history, pc >>
+clock_vars  == << inbox, clock, clock_history >>
+all_vars    == Append(clock_vars, pc)
 
 \* ---------------------------------------------------------------------------
 \* Safety checks (INVARIANTS)
@@ -38,32 +39,54 @@ vars == << inbox, clocks, clocks_history, pc >>
 
 ProcSet == (Procs)
 
-Init == (* Global variables *)
+Init == 
     /\ inbox = [p \in Procs |-> <<>>]
-    /\ clocks = [p \in Procs |-> 0]
-    /\ clocks_history = [p \in Procs |-> <<>>]
+    /\ clock = [p \in Procs |-> 0]
+    /\ clock_history = [p \in Procs |-> <<>>]
     /\ pc = [self \in ProcSet |-> "START"]
 
 
 WorkerStart(self) ==
     /\ pc[self] = "START"
-    /\ UNCHANGED vars
+      \/ pc' = [pc EXCEPT ![self] = "STOP"]
+      \/ pc' = [pc EXCEPT ![self] = "SEND"]
+      \/ pc' = [pc EXCEPT ![self] = "RCV"]
+      \/ pc' = [pc EXCEPT ![self] = "INT"]
+      \/ UNCHANGED clock_vars
 
 WorkerSend(self) ==
     /\ pc[self] = "SEND"
-    /\ UNCHANGED vars
+    /\ pc' = [pc EXCEPT ![self] = "START"]
+    /\ UNCHANGED clock_vars
     
 WorkerReceive(self) ==
     /\ pc[self] = "RCV"
-    /\ UNCHANGED vars
+    /\ pc' = [pc EXCEPT ![self] = "START"]
+    /\ UNCHANGED clock_vars
 
 WorkerInternal(self) ==
     /\ pc[self] = "INT"
-    /\ UNCHANGED vars
+    /\ clock'[self] = clock[self] + 1
+    /\ clock_history'[self] = Append(clock_history[self], clock'[self])
+    /\ pc' = [pc EXCEPT ![self] = "START"]
+    /\ UNCHANGED inbox
 
 WorkerStop(self) ==
     /\ pc[self] = "STOP"
-    /\ UNCHANGED vars
+    /\ pc' = [pc EXCEPT ![self] = "START"]
+    /\ UNCHANGED clock_vars
+
+Probe(self) ==
+    /\ IF Debug 
+        THEN 
+            /\ PrintT(("----"))
+            /\ PrintT(("Self: " \o ToString(self)))
+            /\ PrintT(("Procs: " \o ToString(Procs)))
+            /\ PrintT(("clock: " \o ToString(clock)))
+            /\ PrintT(("clock_history: " \o ToString(clock_history)))
+            /\ PrintT(("inbox: " \o ToString(inbox)))
+        ELSE 
+            /\ TRUE
 
 Worker(self) == 
     /\ WorkerStart(self)
@@ -71,10 +94,11 @@ Worker(self) ==
     /\ WorkerReceive(self)
     /\ WorkerInternal(self)
     /\ WorkerStop(self)
+    /\ Probe(self)
 
 Next == \E self \in Procs: Worker(self)
 
-Spec == Init /\ [][Next]_vars
+Spec == Init /\ [][Next]_clock_vars
 
 
 (* Liveness checks (PROPERTIES)
