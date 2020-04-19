@@ -37,14 +37,11 @@ all_vars    == Append(clock_vars, pc)
 
 \* LABELS = START, STOP, SEND, RCV, INT
 
-ProcSet == (Procs)
-
 Init == 
     /\ inbox = [p \in Procs |-> <<>>]
     /\ clock = [p \in Procs |-> 0]
     /\ clock_history = [p \in Procs |-> <<>>]
-    /\ pc = [self \in ProcSet |-> "START"]
-
+    /\ pc = [self \in Procs |-> "START"]
 
 WorkerStart(self) ==
     /\ pc[self] = "START"
@@ -56,8 +53,13 @@ WorkerStart(self) ==
 
 WorkerSend(self) ==
     /\ pc[self] = "SEND"
-    /\ pc' = [pc EXCEPT ![self] = "START"]
-    /\ UNCHANGED clock_vars
+    /\ LET 
+            other_clocks == {x \in Procs : x # self}
+       IN   /\ clock'[self] = clock[self] + 1
+            /\ clock_history'[self = Append(clock_history[self], clock'[self])
+            /\ \E target \in other_clocks : 
+                    inbox'[target] = Append(inbox[target], clock'[self])
+            /\ pc' = [pc EXCEPT ![self] = "START"]
     
 WorkerReceive(self) ==
     /\ pc[self] = "RCV"
