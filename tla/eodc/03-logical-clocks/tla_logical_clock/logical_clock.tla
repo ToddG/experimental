@@ -12,7 +12,8 @@ LOCAL INSTANCE Naturals
 CONSTANT Debug                  \* if true then print debug stuff
 ASSUME Debug \in BOOLEAN        \* make sure debug is a boolean
 CONSTANT Proc                  \* processors
-ASSUME Cardinality(Proc) > 0   \* we need at least one processor
+ASSUME Cardinality(Proc) > 0   \* we need at least
+CONSTANT Null
 
 \* ---------------------------------------------------------------------------
 \* Variables
@@ -43,7 +44,7 @@ Init ==
     /\ clock = [p \in Proc |-> 0]
     /\ clock_history = [p \in Proc |-> <<>>]
     \*/\ states = {"START", "STOP", "SEND", "RCV", "INT"} 
-    /\ states = {"START", "SEND"} 
+    /\ states = {"START", "SEND", "RCV"} 
     /\ pc = [self \in Proc |-> "START"]
 
 TypeInvariant ==
@@ -66,9 +67,19 @@ WorkerSend(self) ==
         /\ UNCHANGED <<states>>
     
 WorkerReceive(self) ==
-    /\ pc[self] = "RCV"
-    /\ pc' = [pc EXCEPT ![self] = "START"]
-    /\ UNCHANGED clock_vars
+    LET
+        H == IF inbox[self] = <<>> THEN Null ELSE Head(inbox[self])
+        T == IF inbox[self] = <<>> THEN Null ELSE Tail(inbox[self])
+    IN  /\ pc[self] = "RCV"
+        /\ IF H # Null
+            THEN /\ PrintT("H: " \o ToString(H))
+                 /\ clock' = [clock EXCEPT ![self] = PT!Max(clock[self], H) + 1]
+                 /\ clock_history' = [clock_history EXCEPT ![self] = Append(@, clock'[self])]
+                 /\ inbox' = [inbox EXCEPT ![self] = T]
+                 /\ UNCHANGED <<states>>
+            ELSE /\ TRUE
+                 /\ UNCHANGED clock_vars
+        /\ pc' = [pc EXCEPT ![self] = "START"]
 
 WorkerInternal(self) ==
     /\ pc[self] = "INT"
