@@ -9,8 +9,6 @@ LOCAL INSTANCE Naturals
 CONSTANT Debug                  \* if true then print debug stuff
 ASSUME Debug \in {TRUE, FALSE}
 CONSTANT Procs                  \* processors
-CONSTANT MaxValue               \* maximum value to increment to
-ASSUME MaxValue \in Nat \ {0}   \* maximum value should be in 1..Nat
 
 \* TODO: add more constants here and initialize in the `.cfg` file
 
@@ -36,15 +34,8 @@ variables
 \* ---------------------------------------------------------------------------
 \* defines (INVARIANTS)
 \* ---------------------------------------------------------------------------
-define
-    ProcValuesNeverExceedMaxValue ==
-        \A p \in Procs : ~(clocks[p] > MaxValue)
-    MaxValueIsAlwaysGreatest ==
-        \A p \in Procs : PT!Max(clocks[p], MaxValue) = MaxValue
-    Invariants ==
-        /\ ProcValuesNeverExceedMaxValue
-        /\ MaxValueIsAlwaysGreatest
-end define;
+\*define
+\*end define;
 
 \* ---------------------------------------------------------------------------
 \* macros can be called by procedures and processes
@@ -61,92 +52,60 @@ macro debug(name) begin
     end if;
 end macro;
 
-macro increment() begin
-    if clocks[self] < MaxValue then
-        clocks[self] := clocks[self] + 1; 
-        clocks_history[self] := Append(clocks_history[self], clocks[self]);
-    end if;
-end macro;
-
 \* ---------------------------------------------------------------------------
 \* procedures can be called by processes (and can call macros)
 \* ---------------------------------------------------------------------------
-\* do_send
+\* send_event
 \*
 \*  Send a message to a target process.
 \*
 \*  Arguments:
-\*      target (id)     : process id of the target (receiver)
-procedure do_send(target)
+\*      target (id)     : process id of the target 
+procedure send_event(target) 
 begin
-    PreSend:
-    debug("DoSend Before" \o ToString(target));
     \* simulate sending a message to the target by appending to the target's
     \* inbox the source's updated clock value
-    DoSend:
+    SendEvent:
     inbox[target] := Append(inbox[target], clocks[self]);
-    debug("DoSend After");
     return;
 end procedure;
 
-\* \* do_receive
-\* \*
-\* \*  Pop messages off the inbox and update clock 
-\* \*
-\* \*  Arguments:
-\* \*      receiver (id)   : process id of the receiver
-\* procedure do_receive(r_receiver)
-\*     variables
-\*         H = <<>>,
-\*         T = <<>>;
-\* begin
-\*     DoReceive:
-\*     debug("DoReceive Before");
-\*     if inbox[r_receiver] # <<>> then
-\*         H := Head(inbox[r_receiver]);
-\*         T := Tail(inbox[r_receiver]);
-\*         clocks[r_receiver] := PT!Max(clocks[r_receiver], H) + 1;
-\*         inbox[r_receiver] := T;
-\*     end if; 
-\*     debug("DoReceive After");
-\* end procedure;
+\* receive_event
+\*
+\*  Pop messages off the inbox and update clock 
+\*
+procedure receive_event()
+variables
+    H = <<>>,
+    T = <<>>;
+begin
+    ReceiveEvent:
+        if inbox[self] # <<>> then
+            H := Head(inbox[self]);
+            T := Tail(inbox[self]);
+            clocks[self] := (PT!Max(clocks[self], H) + 1);
+            inbox[self] := T;
+            clocks_history[self] := Append(clocks_history[self], clocks[self]);
+        end if;
+    EndReceiveEvent:
+    return; 
+end procedure;
 
-\*  do_increment
+\*  increment_clock
 \* 
 \*  Increment the clock value for this proc id, and add the current value
 \*  to the clocks_history for this proc id.
 \* 
 \*     Arguments:
 \*         proc (id) : process id
-procedure do_increment()
+procedure increment_clock() 
 begin
-    DoIncrement1:
-    debug("DoIncrement Before");
-    if clocks[self] < MaxValue then
-        DoIncrement2:
-        increment();
-    end if;
-    DoIncrement3:
-    debug("DoIncrement After");
+    IncrementClock:
+    clocks[self] := clocks[self] + 1; 
+    clocks_history[self] := Append(clocks_history[self], clocks[self]);
     return;
 end procedure;
 
-\* 
-\* do_internal
-\*
-\*  Some sort of internal event happened that caused the clock of this
-\*  process to increment.
-\*
-procedure do_internal()
-begin
-    DoIncrement1:
-    debug("DoIncrement Before");
-    DoIncrement2:
-    increment();
-    DoIncrement3:
-    debug("DoIncrement After");
-    return;
-end procedure;
 
 \* ---------------------------------------------------------------------------
 \* processes
@@ -157,34 +116,24 @@ process Worker \in Procs
     begin
         LogicalClockWorkflow:
         while TRUE do
-\*              either
-\*                  ProcSend:
-\*                  with p \in Procs \ {self} do
-\*                      call do_send(self, p);
-\*                  end with;
-\*              or
-\*                  ProcReceive:
-\*                  call do_receive(self);
-\*                 ProcReceive:
-\*                 call do_receive(self);
-\*             or
             either
-                ProcSend:
-                print("Procs: " \o ToString(Procs));
-                print("ProcSet: " \o ToString(ProcSet));
-                print("Self: " \o ToString(self));
-                with p \in other_procs  do
-                    call do_send(p);
-                end with;
-      (*      or
-                CallDoInternal:
-                call do_internal();
+                WorkerSend:
+                    debug("WorkerSend");
+                    clocks[self] := clocks[self] + 1; 
+                    clocks_history[self] := Append(clocks_history[self], clocks[self]);
+                    with p \in other_procs  do
+                        call send_event(p);
+                    end with;
             or
-                CallDoIncrement:
-            call do_increment();
-            *)
+                WorkerReceive:
+                    debug("WorkerReceive");
+                    call receive_event();
             or
-                skip;
+                WorkerInternal::
+                    debug("WorkerInternal");
+                    call increment_clock();
+            or
+                    skip;
             end either;
         end while;
 end process;
@@ -194,9 +143,9 @@ end algorithm;
 \* PLUSCAL END
 \* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \* BEGIN TRANSLATION
-\* Label DoIncrement1 of procedure do_increment at line 53 col 5 changed to DoIncrement1_
-\* Label DoIncrement2 of procedure do_increment at line 65 col 5 changed to DoIncrement2_
-\* Label DoIncrement3 of procedure do_increment at line 53 col 5 changed to DoIncrement3_
+\* Label DoIncrement1 of procedure increment_clock at line 53 col 5 changed to DoIncrement1_
+\* Label DoIncrement2 of procedure increment_clock at line 65 col 5 changed to DoIncrement2_
+\* Label DoIncrement3 of procedure increment_clock at line 53 col 5 changed to DoIncrement3_
 CONSTANT defaultInitValue
 VARIABLES inbox, clocks, clocks_history, pc, stack
 
@@ -219,7 +168,7 @@ Init == (* Global variables *)
         /\ inbox = [p \in Procs |-> <<>>]
         /\ clocks = [p \in Procs |-> 0]
         /\ clocks_history = [p \in Procs |-> <<>>]
-        (* Procedure do_send *)
+        (* Procedure send_event *)
         /\ target = [ self \in ProcSet |-> defaultInitValue]
         (* Process Worker *)
         /\ other_procs = [self \in Procs |-> {x \in ProcSet : x # self}]
@@ -256,7 +205,7 @@ DoSend(self) == /\ pc[self] = "DoSend"
                 /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
                 /\ UNCHANGED << clocks, clocks_history, other_procs >>
 
-do_send(self) == PreSend(self) \/ DoSend(self)
+send_event(self) == PreSend(self) \/ DoSend(self)
 
 DoIncrement1_(self) == /\ pc[self] = "DoIncrement1_"
                        /\ IF Debug
@@ -298,7 +247,7 @@ DoIncrement3_(self) == /\ pc[self] = "DoIncrement3_"
                        /\ UNCHANGED << inbox, clocks, clocks_history, target, 
                                        other_procs >>
 
-do_increment(self) == DoIncrement1_(self) \/ DoIncrement2_(self)
+increment_clock(self) == DoIncrement1_(self) \/ DoIncrement2_(self)
                          \/ DoIncrement3_(self)
 
 DoIncrement1(self) == /\ pc[self] = "DoIncrement1"
@@ -354,7 +303,7 @@ ProcSend(self) == /\ pc[self] = "ProcSend"
                   /\ PrintT(("ProcSet: " \o ToString(ProcSet)))
                   /\ PrintT(("Self: " \o ToString(self)))
                   /\ \E p \in other_procs[self]:
-                       /\ /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "do_send",
+                       /\ /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "send_event",
                                                                    pc        |->  "LogicalClockWorkflow",
                                                                    target    |->  target[self] ] >>
                                                                \o stack[self]]
@@ -364,7 +313,7 @@ ProcSend(self) == /\ pc[self] = "ProcSend"
 
 Worker(self) == LogicalClockWorkflow(self) \/ ProcSend(self)
 
-Next == (\E self \in ProcSet:  \/ do_send(self) \/ do_increment(self)
+Next == (\E self \in ProcSet:  \/ send_event(self) \/ increment_clock(self)
                                \/ do_internal(self))
            \/ (\E self \in Procs: Worker(self))
 
