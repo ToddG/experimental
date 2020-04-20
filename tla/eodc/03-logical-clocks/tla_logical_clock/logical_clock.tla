@@ -11,8 +11,8 @@ LOCAL INSTANCE Naturals
 \* ---------------------------------------------------------------------------
 CONSTANT Debug                  \* if true then print debug stuff
 ASSUME Debug \in BOOLEAN        \* make sure debug is a boolean
-CONSTANT Proc                  \* processors
-ASSUME Cardinality(Proc) > 0   \* we need at least
+CONSTANT Proc                   \* processors
+ASSUME Cardinality(Proc) > 0    \* we need at least
 CONSTANT Null
 
 \* ---------------------------------------------------------------------------
@@ -20,13 +20,15 @@ CONSTANT Null
 \* ---------------------------------------------------------------------------
 VARIABLES 
     inbox,                      \* each clock process has a msg inbox (queue)
+    read,                       \* messages that the process has read from inbox 
+    sent,                       \* each clock process has a history of sent changes
     clock,                      \* each clock has it's current value 
-    clock_history,              \* each clock has a history of value changes
+    clock_h,                    \* each clock has a history of value changes
     pc,                         \* program counter
     states                      \* program states
 
-clock_vars  == << inbox, clock, clock_history, states>>
-all_vars  == << inbox, clock, clock_history, states, pc >>
+clock_vars  == << inbox, read, sent, clock, clock_h, states>>
+vars  == << inbox, read, sent, clock, clock_h, states, pc >>
 
 \* ---------------------------------------------------------------------------
 \* Safety checks (INVARIANTS)
@@ -40,15 +42,51 @@ all_vars  == << inbox, clock, clock_history, states, pc >>
 \* LABELS = START, STOP, SEND, RCV, INT
 
 Init == 
-    /\ inbox = [p \in Proc |-> <<>>]
-    /\ clock = [p \in Proc |-> 0]
-    /\ clock_history = [p \in Proc |-> <<>>]
-    \*/\ states = {"START", "STOP", "SEND", "RCV", "INT"} 
-    /\ states = {"START", "SEND", "RCV"} 
-    /\ pc = [self \in Proc |-> "START"]
+    /\ inbox    = [p \in Proc |-> <<>>]
+    /\ sent     = [p \in Proc |-> <<>>]
+    /\ read     = [p \in Proc |-> <<>>]
+    /\ clock    = [p \in Proc |-> 0]
+    /\ clock_h = [p \in Proc |-> <<>>]
+    /\ states   = {"START", "SEND", "RCV", "INT"} 
+    /\ pc       = [self \in Proc |-> "START"]
+
+(*
+EmptyOrNaturalSeq(x) ==
+    IF x = <<>>
+    THEN TRUE
+    ELSE \A m \in x: m \in Nat
+*)
 
 TypeInvariant ==
-    /\ pc \in [Proc -> states]
+    /\ \A p \in Proc :
+        /\ clock[p] \in Nat
+        /\ pc[p] \in (states \cup {"PROBE"})
+        (*
+        /\ EmptyOrNaturalSeq(inbox[p])
+        /\ EmptyOrNaturalSeq(sent[p])
+        /\ EmptyOrNaturalSeq(read[p])
+        /\ EmptyOrNaturalSeq(clock_h[p])
+        *)
+
+MyReduceSeq(op(_,_), set, acc) ==
+    IF set = <<>>
+    THEN acc
+    ELSE PT!ReduceSeq(op, set, acc)
+
+
+MaxClockHist(p)     == MyReduceSeq(PT!Max, clock_h[p], 0)
+MaxSent(p)          == MyReduceSeq(PT!Max, sent[p], 0)
+MaxRead(p)          == MyReduceSeq(PT!Max, read[p], 0)
+MaxInbox(p)         == MyReduceSeq(PT!Max, inbox[p], 0)
+
+Coherence ==
+    /\ \A p \in Proc :
+        /\ clock[p] = MaxClockHist(p)
+        /\ clock[p] >= MaxSent(p)
+
+Invariants ==
+    /\ TypeInvariant
+    /\ Coherence
 
 WorkerStart(self) ==
     /\ pc[self] = "START"
@@ -58,43 +96,54 @@ WorkerStart(self) ==
 WorkerSend(self) ==
     LET 
         other_clocks == {x \in Proc : x # self}
-        ts == JavaTime
-    IN  /\ pc[self] = "SEND"
+        next_clock == clock[self] + 1
+    IN  
+        /\ pc[self] = "SEND"
+        /\ clock' = [clock EXCEPT ![self] = next_clock]
+        /\ clock_h'= [clock_h EXCEPT ![self] = Append(@, next_clock)]
         /\ \E target \in other_clocks : 
-                /\ clock' = [clock EXCEPT ![self] = clock[self] + 1]
-                /\ clock_history'= [clock_history EXCEPT ![self] = Append(@, clock'[self])]
-                /\ inbox' = [inbox EXCEPT ![target] = Append(@, clock'[self])]
-                /\ PrintT("TS: " \o ToString(ts) \o " Proc: " \o ToString(self) \o " Sending: " \o ToString(clock'[self]) \o " To: " \o ToString(target))
+                /\ inbox' = [inbox EXCEPT ![target] = Append(@, next_clock)]
+                /\ sent' = [sent EXCEPT ![self] = Append(@, next_clock)]
         /\ pc' = [pc EXCEPT ![self] = "PROBE"]
-        /\ UNCHANGED <<states>>
+        /\ UNCHANGED <<read, states>>
     
-WorkerReceive(self) ==
-    LET
-        H == IF inbox[self] = <<>> THEN Null ELSE Head(inbox[self])
-        T == IF inbox[self] = <<>> THEN Null ELSE Tail(inbox[self])
-    IN  /\ pc[self] = "RCV"
-        /\ IF H # Null
-            THEN
-                /\ PrintT("Proc: " \o ToString(self) \o " Reading: " \o ToString(H))
-                /\ clock' = [clock EXCEPT ![self] = PT!Max(clock[self], H) + 1]
-                /\ clock_history' = [clock_history EXCEPT ![self] = Append(@, clock'[self])]
-                /\ inbox' = [inbox EXCEPT ![self] = T]
-                /\ UNCHANGED <<states>>
-            ELSE 
-                /\ TRUE
-                /\ UNCHANGED clock_vars
-        /\ pc' = [pc EXCEPT ![self] = "PROBE"]
+WorkerReadInbox(self) ==
+    /\ pc[self] = "RCV"
+    /\ IF inbox[self] # <<>>
+        THEN
+            LET 
+                inbox_max == PT!ReduceSeq(PT!Max, inbox[self], 0)
+            IN 
+                /\ IF inbox_max > clock[self]
+                    THEN
+                        /\ clock' = [clock EXCEPT ![self] = inbox_max + 1]
+                        /\ clock_h' = [clock_h EXCEPT ![self] = Append(@, inbox_max + 1)]
+                        /\ read' = [read EXCEPT ![self] = @ \o inbox[self]]
+                        /\ inbox' = [inbox EXCEPT ![self] = <<>>]
+                        /\ UNCHANGED << sent, states>>
+                    ELSE
+                        /\ TRUE
+                        /\ read' = [read EXCEPT ![self] = @ \o inbox[self]]
+                        /\ inbox' = [inbox EXCEPT ![self] = <<>>]
+                        /\ UNCHANGED << sent, clock, clock_h, states>>
+        ELSE
+            /\ TRUE
+            /\ UNCHANGED clock_vars
+    /\ pc' = [pc EXCEPT ![self] = "PROBE"]
 
 WorkerInternal(self) ==
-    /\ pc[self] = "INT"
-    /\ clock' = [clock EXCEPT ![self] = @ + 1]
-    /\ clock_history' = [clock_history EXCEPT ![self] = Append(@, clock'[self])]
-    /\ pc' = [pc EXCEPT ![self] = "START"]
-    /\ UNCHANGED <<inbox, states>>
+    LET 
+        next_clock == clock[self] + 1
+    IN
+        /\ pc[self] = "INT"
+        /\ clock' = [clock EXCEPT ![self] = next_clock]
+        /\ clock_h' = [clock_h EXCEPT ![self] = Append(@, next_clock)]
+        /\ pc' = [pc EXCEPT ![self] = "PROBE"]
+        /\ UNCHANGED <<inbox, read, sent, states>>
 
 WorkerStop(self) ==
     /\ pc[self] = "STOP"
-    /\ UNCHANGED all_vars
+    /\ UNCHANGED vars
 
 Probe(self) ==
     /\ pc[self] = "PROBE"
@@ -104,8 +153,10 @@ Probe(self) ==
             /\ PrintT(("Self: " \o ToString(self)))
             /\ PrintT(("Proc: " \o ToString(Proc)))
             /\ PrintT(("clock: " \o ToString(clock)))
-            /\ PrintT(("clock_history: " \o ToString(clock_history)))
+            /\ PrintT(("clock_h: " \o ToString(clock_h)))
             /\ PrintT(("inbox: " \o ToString(inbox)))
+            /\ PrintT(("read: " \o ToString(read)))
+            /\ PrintT(("sent: " \o ToString(sent)))
         ELSE 
             /\ TRUE
     /\ pc' = [pc EXCEPT ![self] = "START"]
@@ -114,20 +165,26 @@ Probe(self) ==
 Worker(self) == 
     \/ WorkerStart(self)
     \/ WorkerSend(self)
-    \/ WorkerReceive(self)
+    \/ WorkerReadInbox(self)
     \/ WorkerInternal(self)
     \/ WorkerStop(self)
     \/ Probe(self)
 
 Next == \E self \in Proc: Worker(self)
 
-Spec == Init /\ [][Next]_all_vars
+Spec == 
+    /\ Init /\ [][Next]_vars
+    /\ \A self \in Proc: WF_vars(Worker(self))
 
 
 (* Liveness checks (PROPERTIES)
     Example of "eventually this is always true..."
         Liveness == <>[](some_value = SomeCheck())
+ClocksAlwaysIncrease ==
+    [] \A self \in Proc:
+            clock'[self] >= clock[self]
 *)
+
 
 =============================================================================
 \* Modification History
