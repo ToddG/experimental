@@ -19,23 +19,20 @@ VARIABLES
 
 vars == << v >>
 
-TypeOK == v \in Nat
+TypeOK == 
+    /\ v \in Nat
 
-Invariants == TypeOK
+Invariants == 
+    /\ TypeOK
 
-Init == v = 0
+Init == 
+    /\ v = 0
 
-Probe(p) ==
-    IF Debug 
-    THEN PrintT("Proc[" \o ToString(p) \o "] v = " \o ToString(v))
-    ELSE TRUE
-
-Increment(p) ==
+Increment(p) == 
     /\ v' = v + 1
-    /\ Probe(p)
 
 ClockConstraint ==
-    v <= MaxValue
+    /\ v <= MaxValue
 
 Next == \E p \in Proc : Increment(p)
 
