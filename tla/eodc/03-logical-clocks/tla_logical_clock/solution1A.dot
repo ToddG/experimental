@@ -1,0 +1,13 @@
+strict digraph DiskGraph {
+nodesep=0.35;
+subgraph cluster_graph {
+color="white";
+4658129066541613684 [label="/\\ clock = (p1 :> 0)\n/\\ clock_h = (p1 :> <<>>)\n/\\ sent = (p1 :> <<>>)\n/\\ read = (p1 :> <<>>)\n/\\ inbox = (p1 :> <<>>)",style = filled]
+4658129066541613684 -> -7480687346408196411 [label="",color="black",fontcolor="black"];
+-7480687346408196411 [label="/\\ clock = (p1 :> 1)\n/\\ clock_h = (p1 :> <<1>>)\n/\\ sent = (p1 :> <<>>)\n/\\ read = (p1 :> <<>>)\n/\\ inbox = (p1 :> <<>>)"];
+-7480687346408196411 -> 3810197566953133904 [label="",color="black",fontcolor="black"];
+3810197566953133904 [label="/\\ clock = (p1 :> 2)\n/\\ clock_h = (p1 :> <<1, 2>>)\n/\\ sent = (p1 :> <<>>)\n/\\ read = (p1 :> <<>>)\n/\\ inbox = (p1 :> <<>>)"];
+{rank = same; 4658129066541613684;}
+{rank = same; -7480687346408196411;}
+}
+}
