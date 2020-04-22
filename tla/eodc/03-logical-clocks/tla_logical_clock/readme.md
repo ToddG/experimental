@@ -196,9 +196,9 @@ Here's the problem:
 ```
 
 The `sent`, `read`, and `clock_h` variables explode the state space. I'm using
-them to reason about the clock.  I suppose I should delete these extra states
+them to reason about the clock.  I suppose I should delete these extra variables
 and be more clever about how I reason about the algorithm...and in fact that's
-my next step. However, my general question is, is there an idiomatic way to
+my next step. However, my general question is: Is there an idiomatic way to
 separate the stuff we use to verify that an algorithm works the way we want
 from the core of the algorithm itself? In this fantasy, I'm imagining that I
 put `clock` and `inbox` in SpecA, and put the auxillary stuff into SpecB and
