@@ -1,0 +1,44 @@
+strict digraph DiskGraph {
+nodesep=0.35;
+subgraph cluster_graph {
+color="white";
+-4002995596148777663 [label="/\\ clock = (p1 :> 0 @@ p2 :> 0)\n/\\ inbox = (p1 :> 0 @@ p2 :> 0)",style = filled]
+-4002995596148777663 -> -4002995596148777663 [label="",color="black",fontcolor="black"];
+-4002995596148777663 -> 5593050929379908798 [label="",color="black",fontcolor="black"];
+5593050929379908798 [label="/\\ clock = (p1 :> 1 @@ p2 :> 0)\n/\\ inbox = (p1 :> 0 @@ p2 :> 0)"];
+-4002995596148777663 -> -4002995596148777663 [label="",color="black",fontcolor="black"];
+-4002995596148777663 -> -7773981354004360841 [label="",color="black",fontcolor="black"];
+-7773981354004360841 [label="/\\ clock = (p1 :> 0 @@ p2 :> 1)\n/\\ inbox = (p1 :> 0 @@ p2 :> 0)"];
+5593050929379908798 -> 6958884806123411781 [label="",color="black",fontcolor="black"];
+6958884806123411781 [label="/\\ clock = (p1 :> 1 @@ p2 :> 0)\n/\\ inbox = (p1 :> 0 @@ p2 :> 1)"];
+5593050929379908798 -> 5593050929379908798 [label="",color="black",fontcolor="black"];
+5593050929379908798 -> 1292893443870003336 [label="",color="black",fontcolor="black"];
+1292893443870003336 [label="/\\ clock = (p1 :> 1 @@ p2 :> 1)\n/\\ inbox = (p1 :> 0 @@ p2 :> 0)"];
+-7773981354004360841 -> -7773981354004360841 [label="",color="black",fontcolor="black"];
+-7773981354004360841 -> 1292893443870003336 [label="",color="black",fontcolor="black"];
+-7773981354004360841 -> 2565919010040998227 [label="",color="black",fontcolor="black"];
+2565919010040998227 [label="/\\ clock = (p1 :> 0 @@ p2 :> 1)\n/\\ inbox = (p1 :> 1 @@ p2 :> 0)"];
+6958884806123411781 -> 6958884806123411781 [label="",color="black",fontcolor="black"];
+6958884806123411781 -> 6958884806123411781 [label="",color="black",fontcolor="black"];
+6958884806123411781 -> 4394714234216207731 [label="",color="black",fontcolor="black"];
+4394714234216207731 [label="/\\ clock = (p1 :> 1 @@ p2 :> 1)\n/\\ inbox = (p1 :> 0 @@ p2 :> 1)"];
+1292893443870003336 -> 4394714234216207731 [label="",color="black",fontcolor="black"];
+1292893443870003336 -> -6451411794020226900 [label="",color="black",fontcolor="black"];
+-6451411794020226900 [label="/\\ clock = (p1 :> 1 @@ p2 :> 1)\n/\\ inbox = (p1 :> 1 @@ p2 :> 0)"];
+2565919010040998227 -> 2565919010040998227 [label="",color="black",fontcolor="black"];
+2565919010040998227 -> -6451411794020226900 [label="",color="black",fontcolor="black"];
+2565919010040998227 -> 2565919010040998227 [label="",color="black",fontcolor="black"];
+4394714234216207731 -> 4394714234216207731 [label="",color="black",fontcolor="black"];
+4394714234216207731 -> -8395952338775675561 [label="",color="black",fontcolor="black"];
+-8395952338775675561 [label="/\\ clock = (p1 :> 1 @@ p2 :> 1)\n/\\ inbox = (p1 :> 1 @@ p2 :> 1)"];
+-6451411794020226900 -> -8395952338775675561 [label="",color="black",fontcolor="black"];
+-6451411794020226900 -> -6451411794020226900 [label="",color="black",fontcolor="black"];
+-8395952338775675561 -> -8395952338775675561 [label="",color="black",fontcolor="black"];
+-8395952338775675561 -> -8395952338775675561 [label="",color="black",fontcolor="black"];
+{rank = same; -4002995596148777663;}
+{rank = same; -7773981354004360841;5593050929379908798;}
+{rank = same; 6958884806123411781;1292893443870003336;2565919010040998227;}
+{rank = same; -6451411794020226900;4394714234216207731;}
+{rank = same; -8395952338775675561;}
+}
+}

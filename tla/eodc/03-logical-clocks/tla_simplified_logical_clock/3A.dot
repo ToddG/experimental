@@ -1,0 +1,10 @@
+strict digraph DiskGraph {
+nodesep=0.35;
+subgraph cluster_graph {
+color="white";
+-8656815684445219628 [label="/\\ clock = (p1 :> 0)\n/\\ inbox = (p1 :> 0)",style = filled]
+-8656815684445219628 -> -4319018368230736603 [label="",color="black",fontcolor="black"];
+-4319018368230736603 [label="/\\ clock = (p1 :> 1)\n/\\ inbox = (p1 :> 0)"];
+{rank = same; -8656815684445219628;}
+}
+}
