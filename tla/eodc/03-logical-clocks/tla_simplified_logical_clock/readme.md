@@ -268,6 +268,7 @@ CONSTRAINTS
 I'm not sure what config files to extract from the logical_clock3.toolbox file
 to make sense of what the IDE is doing, but here are some screenshots...
 
+* ![Spec Options](./tla-spec-options.png)
 * ![Model Checking Results](./tla-model-checking-results.png)
 * ![Model Overview](./tla-toolbox-model-overview.png)
 * ![Progress Output](./tla-toolbox-progress-output.png)
