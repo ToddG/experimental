@@ -51,11 +51,7 @@ Constraints ==
 \* ActionConstraints
 \* ---------------------------------------------------------------------------
 
-ClocksNeverDecrease ==
-    \A p \in Proc : ~(clock'[p] < clock[p]) /\ ~(inbox'[p] < inbox[p])
-
-ActionConstraints ==
-    /\ ClocksNeverDecrease
+ActionConstraints == TRUE
 
 \* ---------------------------------------------------------------------------
 \* Behaviours

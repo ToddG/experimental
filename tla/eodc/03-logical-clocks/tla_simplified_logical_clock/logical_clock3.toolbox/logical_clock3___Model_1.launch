@@ -5,7 +5,7 @@
     <stringAttribute key="distributedNetworkInterface" value="172.17.0.1"/>
     <intAttribute key="distributedNodesCount" value="1"/>
     <stringAttribute key="distributedTLC" value="off"/>
-    <intAttribute key="fpIndex" value="62"/>
+    <intAttribute key="fpIndex" value="52"/>
     <intAttribute key="maxHeapSize" value="25"/>
     <stringAttribute key="modelBehaviorInit" value=""/>
     <stringAttribute key="modelBehaviorNext" value=""/>
@@ -16,15 +16,15 @@
     <booleanAttribute key="modelCorrectnessCheckDeadlock" value="true"/>
     <listAttribute key="modelCorrectnessInvariants"/>
     <listAttribute key="modelCorrectnessProperties"/>
-    <intAttribute key="modelEditorOpenTabs" value="2"/>
+    <intAttribute key="modelEditorOpenTabs" value="6"/>
     <stringAttribute key="modelExpressionEval" value=""/>
     <stringAttribute key="modelParameterActionConstraint" value="ActionConstraints"/>
     <listAttribute key="modelParameterConstants">
-        <listEntry value="Proc;;{p1};1;0"/>
-        <listEntry value="MaxClockValue;;1;0;0"/>
-        <listEntry value="MaxInboxLength;;1;0;0"/>
+        <listEntry value="Proc;;{p1, p2};1;0"/>
+        <listEntry value="MaxClockValue;;2;0;0"/>
+        <listEntry value="MaxInboxLength;;2;0;0"/>
     </listAttribute>
-    <stringAttribute key="modelParameterContraint" value=""/>
+    <stringAttribute key="modelParameterContraint" value="Constraints"/>
     <listAttribute key="modelParameterDefinitions"/>
     <stringAttribute key="modelParameterModelValues" value="{}"/>
     <stringAttribute key="modelParameterNewDefinitions" value=""/>

@@ -236,10 +236,12 @@ as well as the `sent` and `received` variables.
 
 ### Weird GUI Behaviour
 
+Say you are just starting out with the GUI Toolbox. You may get some strange
+behaviour... here's what happened to me. It was PEBKAC..., but I'll describe
+it here to save you some time:
 
-I'd like to start using the GUI Toolbox, but I am getting strange behaviour.
-I'll log some bugs, but for now documenting here...
-
+Here's how long it was taking me to run all the variants of my spec from
+the command line... less than 20 seconds.
 
 ```
 time ./run.sh
@@ -249,7 +251,7 @@ user	0m32.272s
 sys	0m1.453s
 ```
 
-Whereas if I run [Spec3](./logical_clock3.tla) with the equivalent of
+Whereas when I was running [Spec3](./logical_clock3.tla) with the equivalent of
 [A.cfg](./A.cfg)...well it turned my laptop into a heater and I stopped it
 after 5 minutes.
 
@@ -265,14 +267,34 @@ CONSTRAINTS
     Constraints 
 ```
 
-I'm not sure what config files to extract from the logical_clock3.toolbox file
-to make sense of what the IDE is doing, but here are some screenshots...
+Screenshots
 
 * ![Spec Options](./tla-spec-options.png)
 * ![Model Checking Results](./tla-model-checking-results.png)
 * ![Model Overview](./tla-toolbox-model-overview.png)
 * ![Progress Output](./tla-toolbox-progress-output.png)
 
+Can you see what's missing? I didn't. [Markus Showed me
+here](https://github.com/tlaplus/tlaplus/issues/446) that I was missing my
+CONSTRAINTS from the generated config file...  The smoking gun is the first
+picture of the Spec Options that shows nothing in the CONSTRAINTS box.
+
+
+Once I added this in the GUI as shown on the left, here:
+
+* ![State Constraints](./tla-state-constraint.png)
+* ![Added State Constraints](./tla-state-constraint-circles.png)
+
+Then this showed up in the `logical_clock3.toolbox/Model_1/MC.cfg` file:
+
+```
+\* CONSTRAINT definition
+CONSTRAINT
+constr_158768250461834000
+```
+
+Now that we have a constraint, this runs swimmingly as you can see in the 
+right circle (above screenshot).
 
 ### TODO
 
