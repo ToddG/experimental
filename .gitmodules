@@ -1,3 +1,6 @@
 [submodule "interview-questions/glassdoor/sorting/monitor"]
 	path = interview-questions/glassdoor/sorting/monitor
 	url = http://github.com/toddg/monitor
+[submodule "freecad/freecad-source"]
+	path = freecad/freecad-source
+	url = https://github.com/FreeCAD/FreeCAD.git
